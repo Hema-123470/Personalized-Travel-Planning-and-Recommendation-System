@@ -1,0 +1,96 @@
+{% extends 'admin_base.html' %}
+{% block title %}Reports & Analytics – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-chart-bar me-2 text-primary"></i>Reports & Analytics</h5>
+        <span class="text-muted small"><i class="fas fa-calendar me-1"></i>Last 12 months</span>
+      </div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card p-3 border-start border-success border-3"><div class="d-flex align-items-center gap-3"><div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px"><i class="fas fa-rupee-sign text-success fa-lg"></i></div><div><div class="text-muted small">Total Revenue</div><div class="fw-bold fs-4">₹{{ total_revenue|floatformat:0 }}</div></div></div></div></div>
+        <div class="col-md-4"><div class="card p-3 border-start border-primary border-3"><div class="d-flex align-items-center gap-3"><div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px"><i class="fas fa-calendar-check text-primary fa-lg"></i></div><div><div class="text-muted small">Total Bookings</div><div class="fw-bold fs-4">{{ total_bookings }}</div></div></div></div></div>
+        <div class="col-md-4"><div class="card p-3 border-start border-info border-3"><div class="d-flex align-items-center gap-3"><div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width:52px;height:52px"><i class="fas fa-check-circle text-info fa-lg"></i></div><div><div class="text-muted small">Confirmed Bookings</div><div class="fw-bold fs-4">{{ confirmed_bookings }}</div></div></div></div></div>
+      </div>
+      <div class="card p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Monthly Revenue Overview (Last 12 Months)</h6>
+        <canvas id="revenueChart" height="90"></canvas>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h6 class="fw-bold mb-3">Bookings by Type</h6>
+            <table class="table table-hover table-sm mb-0">
+              <thead><tr><th>Type</th><th>Count</th></tr></thead>
+              <tbody>
+                {% for item in bookings_by_type %}
+                <tr>
+                  <td><span class="badge bg-{% if item.booking_type == 'hotel' %}info text-dark{% elif item.booking_type == 'package' %}success{% else %}warning text-dark{% endif %} rounded-pill">{{ item.booking_type|title }}</span></td>
+                  <td class="fw-bold">{{ item.count }}</td>
+                </tr>
+                {% empty %}<tr><td colspan="2" class="text-muted text-center py-3">No data.</td></tr>{% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h6 class="fw-bold mb-3">Bookings by Status</h6>
+            <table class="table table-hover table-sm mb-0">
+              <thead><tr><th>Status</th><th>Count</th><th>%</th></tr></thead>
+              <tbody>
+                {% for item in bookings_by_status %}
+                <tr>
+                  <td><span class="badge bg-{% if item.status == 'confirmed' %}success{% elif item.status == 'pending' %}warning text-dark{% elif item.status == 'cancelled' %}danger{% else %}info text-dark{% endif %} rounded-pill">{{ item.status|title }}</span></td>
+                  <td class="fw-bold">{{ item.count }}</td>
+                  <td>{% if total_bookings > 0 %}<div class="d-flex align-items-center gap-1"><div class="progress flex-grow-1" style="height:6px"><div class="progress-bar bg-primary" style="width:{% widthratio item.count total_bookings 100 %}%"></div></div><span class="small text-muted">{% widthratio item.count total_bookings 100 %}%</span></div>{% else %}—{% endif %}</td>
+                </tr>
+                {% empty %}<tr><td colspan="3" class="text-muted text-center py-3">No data.</td></tr>{% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const monthsData = {{ monthly_data|safe }};
+new Chart(document.getElementById('revenueChart'), {
+  type: 'bar',
+  data: {
+    labels: monthsData.map(d => d.month),
+    datasets: [{
+      label: 'Revenue (₹)',
+      data: monthsData.map(d => d.revenue),
+      backgroundColor: 'rgba(13,110,253,0.15)',
+      borderColor: 'rgba(13,110,253,0.8)',
+      borderWidth: 2,
+      borderRadius: 6,
+    },{
+      label: 'Bookings',
+      data: monthsData.map(d => d.count),
+      backgroundColor: 'rgba(25,135,84,0.5)',
+      borderColor: '#198754',
+      borderWidth: 2,
+      borderRadius: 6,
+      type: 'line',
+      yAxisID: 'y1',
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }, grid: { color: 'rgba(0,0,0,0.05)' } },
+      y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+    }
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us – AI Travel Planner{% endblock %}
+{% block content %}
+<section class="py-5" style="background:linear-gradient(135deg,#667eea,#764ba2);min-height:35vh;display:flex;align-items:center">
+  <div class="container text-center text-white">
+    <h1 class="fw-bold display-5">Get in Touch</h1>
+    <p class="fs-5 text-white-75">We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-lg-4">
+      <h5 class="fw-bold mb-4">Contact Information</h5>
+      <div class="d-flex gap-3 mb-4">
+        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width:50px;height:50px;min-width:50px"><i class="fas fa-map-marker-alt"></i></div>
+        <div>
+          <h6 class="fw-semibold mb-1">Address</h6>
+          <p class="text-muted small mb-0">123 Travel Street, Bandra West<br>Mumbai, Maharashtra 400050</p>
+        </div>
+      </div>
+      <div class="d-flex gap-3 mb-4">
+        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center text-white" style="width:50px;height:50px;min-width:50px"><i class="fas fa-phone"></i></div>
+        <div>
+          <h6 class="fw-semibold mb-1">Phone</h6>
+          <p class="text-muted small mb-0">+91 98765 43210<br>+91 11 2345 6789</p>
+        </div>
+      </div>
+      <div class="d-flex gap-3 mb-4">
+        <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center text-white" style="width:50px;height:50px;min-width:50px"><i class="fas fa-envelope"></i></div>
+        <div>
+          <h6 class="fw-semibold mb-1">Email</h6>
+          <p class="text-muted small mb-0">info@aitravelplanner.com<br>support@aitravelplanner.com</p>
+        </div>
+      </div>
+      <div class="d-flex gap-3 mb-4">
+        <div class="bg-info rounded-circle d-flex align-items-center justify-content-center text-white" style="width:50px;height:50px;min-width:50px"><i class="fas fa-clock"></i></div>
+        <div>
+          <h6 class="fw-semibold mb-1">Business Hours</h6>
+          <p class="text-muted small mb-0">Monday–Friday: 9 AM – 6 PM IST<br>Saturday: 10 AM – 4 PM IST</p>
+        </div>
+      </div>
+      <div class="mt-4">
+        <h6 class="fw-semibold mb-3">Follow Us</h6>
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-sm btn-primary rounded-circle" style="width:40px;height:40px;line-height:1.6"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="btn btn-sm btn-info rounded-circle" style="width:40px;height:40px;line-height:1.6"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="btn btn-sm btn-danger rounded-circle" style="width:40px;height:40px;line-height:1.6"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="btn btn-sm btn-secondary rounded-circle" style="width:40px;height:40px;line-height:1.6"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card p-4 shadow-sm">
+        <h5 class="fw-bold mb-4"><i class="fas fa-paper-plane me-2 text-primary"></i>Send Us a Message</h5>
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Your Name *</label>
+              <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+              <div class="invalid-feedback">Please enter your name.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email Address *</label>
+              <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+              <div class="invalid-feedback">Please enter a valid email.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Subject *</label>
+              <select name="subject" class="form-select" required>
+                <option value="">Select a subject...</option>
+                <option>Booking Inquiry</option>
+                <option>Technical Support</option>
+                <option>Feedback &amp; Suggestions</option>
+                <option>Partnership</option>
+                <option>General Inquiry</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Message *</label>
+              <textarea name="message" class="form-control" rows="5" placeholder="How can we help you?" required></textarea>
+              <div class="invalid-feedback">Please enter your message.</div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary px-5 rounded-pill fw-semibold">
+                <i class="fas fa-paper-plane me-2"></i>Send Message
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

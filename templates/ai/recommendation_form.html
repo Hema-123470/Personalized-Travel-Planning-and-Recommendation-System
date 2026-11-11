@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}AI Recommendations – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;background:linear-gradient(135deg,#667eea,#764ba2)">
+            <i class="fas fa-robot fa-2x text-white"></i>
+          </div>
+          <h3 class="fw-bold">AI Destination Recommendations</h3>
+          <p class="text-muted">Tell us your preferences and let AI find the perfect destination for you.</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">What kind of trip are you looking for?</label>
+              <textarea name="query" class="form-control" rows="3" placeholder="e.g., Beach vacation with family, adventure trekking, cultural heritage tour..."></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Total Budget (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" name="budget" class="form-control" placeholder="50000" min="1000">
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Duration (Days)</label>
+              <input type="number" name="duration" class="form-control" value="5" min="1" max="30">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Travelers</label>
+              <input type="number" name="travelers" class="form-control" value="2" min="1">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Preferred Climate</label>
+              <select name="climate" class="form-select">
+                <option value="">Any Climate</option>
+                <option value="tropical">Tropical</option>
+                <option value="temperate">Temperate</option>
+                <option value="arid">Arid/Desert</option>
+                <option value="continental">Continental</option>
+                <option value="polar">Polar/Snow</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Travel Style</label>
+              <select name="travel_style" class="form-select">
+                <option value="">Any Style</option>
+                <option value="adventure">Adventure</option>
+                <option value="relaxation">Relaxation/Leisure</option>
+                <option value="cultural">Cultural/Heritage</option>
+                <option value="nature">Nature/Wildlife</option>
+                <option value="family">Family</option>
+                <option value="honeymoon">Honeymoon/Romantic</option>
+                <option value="budget">Budget Travel</option>
+              </select>
+            </div>
+            <div class="col-12 mt-2">
+              <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold rounded-pill fs-5">
+                <i class="fas fa-magic me-2"></i>Get AI Recommendations
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

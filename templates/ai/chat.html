@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}AI Chat Assistant – AI Travel Planner{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-container { height: 480px; overflow-y: auto; scroll-behavior: smooth; }
+.typing-dots { display:inline-block; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card overflow-hidden shadow">
+        <!-- Chat Header -->
+        <div class="p-4 text-white d-flex align-items-center justify-content-between" style="background:linear-gradient(135deg,#0a0e1a,#1a1f35)">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px">
+              <i class="fas fa-robot fa-lg text-white"></i>
+            </div>
+            <div>
+              <div class="fw-bold">AI Travel Assistant</div>
+              <div class="d-flex align-items-center gap-1 text-success small">
+                <i class="fas fa-circle" style="font-size:.5rem"></i> Online & Ready
+              </div>
+            </div>
+          </div>
+          <a href="{% url 'clear_chat' %}" class="btn btn-sm btn-outline-light rounded-pill" onclick="return confirm('Clear chat history?')">
+            <i class="fas fa-trash me-1"></i>Clear
+          </a>
+        </div>
+        <!-- Chat Messages -->
+        <div class="chat-container bg-light p-4" id="chatContainer">
+          {% if not chat_history %}
+          <div class="d-flex mb-3">
+            <div class="chat-bubble-ai">
+              <strong>👋 Hello {{ request.user.first_name|default:request.user.username }}!</strong><br>
+              I'm your AI travel assistant. I can help you with:<br>
+              🌍 Destination recommendations<br>
+              📅 Trip itinerary planning<br>
+              💰 Budget estimation<br>
+              🏨 Hotel &amp; transport suggestions<br>
+              🌤️ Weather information<br><br>
+              What would you like to explore today?
+            </div>
+          </div>
+          {% endif %}
+          {% for msg in chat_history %}
+          <div class="d-flex mb-3 {% if msg.role == 'user' %}justify-content-end{% else %}justify-content-start{% endif %}">
+            <div class="{% if msg.role == 'user' %}chat-bubble-user{% else %}chat-bubble-ai{% endif %}">
+              {{ msg.content|linebreaksbr }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Chat Input -->
+        <div class="p-3 border-top bg-white">
+          {% csrf_token %}
+          <input type="hidden" id="sessionId" value="{{ session_id }}">
+          <form id="chatForm" class="d-flex gap-2">
+            {% csrf_token %}
+            <input type="text" id="chatInput" class="form-control rounded-pill border" placeholder="Ask me anything about travel..." autocomplete="off" required>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 flex-shrink-0">
+              <i class="fas fa-paper-plane me-1"></i>Send
+            </button>
+          </form>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge bg-light text-muted border cursor-pointer suggestion-btn small" style="cursor:pointer">Beach destinations under ₹30,000</span>
+            <span class="badge bg-light text-muted border cursor-pointer suggestion-btn small" style="cursor:pointer">5 day itinerary for Goa</span>
+            <span class="badge bg-light text-muted border cursor-pointer suggestion-btn small" style="cursor:pointer">Budget hotels in Delhi</span>
+            <span class="badge bg-light text-muted border cursor-pointer suggestion-btn small" style="cursor:pointer">Best time to visit Manali</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          <i class="fas fa-shield-alt me-1 text-success"></i>AI responses are suggestions. Always verify important travel information.
+          {% if not openai_key_configured %} · <span class="text-warning">Using built-in AI (Add OpenAI key for enhanced responses)</span>{% endif %}
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Quick suggestion clicks
+  document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.getElementById('chatInput').value = this.textContent.trim();
+      document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+    });
+  });
+  // Scroll to bottom on load
+  const container = document.getElementById('chatContainer');
+  if (container) container.scrollTop = container.scrollHeight;
+</script>
+{% endblock %}

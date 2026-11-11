@@ -1,0 +1,47 @@
+{% extends 'admin_base.html' %}
+{% block title %}{{ action }} Destination – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0">{{ action }} Destination</h5>
+        <a href="{% url 'admin_destinations' %}" class="btn btn-outline-secondary rounded-pill btn-sm"><i class="fas fa-arrow-left me-1"></i>Back</a>
+      </div>
+      <div class="card p-4">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label fw-semibold">Name *</label>{{ form.name }}{% if form.name.errors %}<div class="text-danger small">{{ form.name.errors|join:"" }}</div>{% endif %}</div>
+            <div class="col-md-3"><label class="form-label fw-semibold">Country *</label>{{ form.country }}</div>
+            <div class="col-md-3"><label class="form-label fw-semibold">State</label>{{ form.state }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">City *</label>{{ form.city }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Category</label>{{ form.category }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Climate</label>{{ form.climate }}</div>
+            <div class="col-12"><label class="form-label fw-semibold">Short Description</label>{{ form.short_description }}</div>
+            <div class="col-12"><label class="form-label fw-semibold">Full Description *</label>{{ form.description }}{% if form.description.errors %}<div class="text-danger small">{{ form.description.errors|join:"" }}</div>{% endif %}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Main Image</label>{{ form.image }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Gallery Image 1</label>{{ form.gallery_image1 }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Gallery Image 2</label>{{ form.gallery_image2 }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Best Time to Visit</label>{{ form.best_time_to_visit }}</div>
+            <div class="col-md-4"><label class="form-label fw-semibold">Average Budget (₹)</label>{{ form.average_budget }}</div>
+            <div class="col-md-2"><label class="form-label fw-semibold">Latitude</label>{{ form.latitude }}</div>
+            <div class="col-md-2"><label class="form-label fw-semibold">Longitude</label>{{ form.longitude }}</div>
+            <div class="col-md-3">
+              <div class="form-check mt-4">{{ form.is_featured }}<label class="form-check-label fw-semibold">Mark as Featured</label></div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-check mt-4">{{ form.is_active }}<label class="form-check-label fw-semibold">Active</label></div>
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold"><i class="fas fa-save me-2"></i>{{ action }} Destination</button>
+            <a href="{% url 'admin_destinations' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

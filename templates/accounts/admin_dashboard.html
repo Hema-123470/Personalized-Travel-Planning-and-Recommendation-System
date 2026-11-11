@@ -1,0 +1,185 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Admin Dashboard – AI Travel Planner{% endblock %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-2 col-md-3">
+      {% include 'partials/admin_sidebar.html' %}
+    </div>
+    <!-- Main Content -->
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 class="fw-bold mb-0">Admin Dashboard</h4>
+          <small class="text-muted">Welcome back, {{ request.user.get_full_name }}</small>
+        </div>
+        <span class="badge bg-success px-3 py-2 rounded-pill"><i class="fas fa-circle me-1" style="font-size:.6rem"></i>System Online</span>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="dashboard-stat primary">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-muted small">Total Users</div>
+                <div class="stat-number fw-bold fs-3 text-primary">{{ total_users }}</div>
+                <div class="text-muted small"><i class="fas fa-arrow-up text-success me-1"></i>Registered Travelers</div>
+              </div>
+              <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-users fa-lg"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="dashboard-stat warning">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-muted small">Destinations</div>
+                <div class="stat-number fw-bold fs-3 text-warning">{{ total_destinations }}</div>
+                <div class="text-muted small">+ {{ total_hotels }} Hotels</div>
+              </div>
+              <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-map-marked-alt fa-lg"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="dashboard-stat success">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-muted small">Total Bookings</div>
+                <div class="stat-number fw-bold fs-3 text-success">{{ total_bookings }}</div>
+                <div class="text-muted small">{{ total_packages }} Packages</div>
+              </div>
+              <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-calendar-check fa-lg"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="dashboard-stat danger">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-muted small">Total Revenue</div>
+                <div class="stat-number fw-bold fs-3 text-danger">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="text-muted small">{{ ai_recommendations }} AI Queries</div>
+              </div>
+              <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-rupee-sign fa-lg"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+          <div class="card p-4">
+            <h6 class="fw-bold mb-3">Monthly Bookings (Last 6 Months)</h6>
+            <canvas id="bookingChart" height="100"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card p-4 h-100">
+            <h6 class="fw-bold mb-3">Quick Actions</h6>
+            <div class="d-grid gap-2">
+              <a href="{% url 'admin_destination_create' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-plus me-2"></i>Add Destination</a>
+              <a href="{% url 'admin_hotel_create' %}" class="btn btn-outline-warning btn-sm"><i class="fas fa-plus me-2"></i>Add Hotel</a>
+              <a href="{% url 'admin_package_create' %}" class="btn btn-outline-success btn-sm"><i class="fas fa-plus me-2"></i>Add Package</a>
+              <a href="{% url 'admin_bookings' %}" class="btn btn-outline-info btn-sm"><i class="fas fa-eye me-2"></i>View Bookings</a>
+              <a href="{% url 'admin_reports' %}" class="btn btn-outline-danger btn-sm"><i class="fas fa-chart-bar me-2"></i>View Reports</a>
+              <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-users me-2"></i>Manage Users</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Bookings -->
+      <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold mb-0">Recent Bookings</h6>
+              <a href="{% url 'admin_bookings' %}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead><tr>
+                  <th>Reference</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th>
+                </tr></thead>
+                <tbody>
+                  {% for booking in recent_bookings %}
+                  <tr>
+                    <td><code class="small">{{ booking.booking_reference }}</code></td>
+                    <td>{{ booking.user.get_full_name }}</td>
+                    <td><span class="badge bg-info">{{ booking.booking_type|title }}</span></td>
+                    <td class="fw-semibold">₹{{ booking.total_amount|floatformat:0 }}</td>
+                    <td>
+                      <span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'pending' %}warning text-dark{% elif booking.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                        {{ booking.status|title }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr><td colspan="5" class="text-center text-muted py-4">No bookings yet.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header bg-white"><h6 class="fw-bold mb-0">Recent Users</h6></div>
+            <div class="list-group list-group-flush">
+              {% for u in recent_users %}
+              <div class="list-group-item d-flex align-items-center gap-3 border-0 py-3">
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:38px;height:38px;min-width:38px;font-size:.85rem">
+                  {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+                </div>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold small">{{ u.get_full_name }}</div>
+                  <div class="text-muted" style="font-size:.75rem">{{ u.email }}</div>
+                </div>
+                <span class="badge bg-success">{{ u.role|title }}</span>
+              </div>
+              {% empty %}
+              <div class="list-group-item text-center text-muted py-3">No users yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const monthsData = {{ months_data|safe }};
+new Chart(document.getElementById('bookingChart'), {
+  type: 'bar',
+  data: {
+    labels: monthsData.map(d => d.month),
+    datasets: [{
+      label: 'Bookings',
+      data: monthsData.map(d => d.count),
+      backgroundColor: 'rgba(13,110,253,0.7)',
+      borderColor: '#0d6efd',
+      borderWidth: 1,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, grid: { color: '#f0f0f0' } } }
+  }
+});
+</script>
+{% endblock %}

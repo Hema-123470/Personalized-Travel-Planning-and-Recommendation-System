@@ -1,0 +1,48 @@
+{% extends 'admin_base.html' %}
+{% block title %}Manage Reviews – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-star me-2 text-warning"></i>Manage Reviews</h5>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>User</th><th>Title</th><th>Rating</th><th>For</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for review in reviews %}
+              <tr>
+                <td class="align-middle small fw-semibold">{{ review.user.get_full_name|default:review.user.username }}</td>
+                <td class="align-middle">
+                  <div class="fw-semibold small">{{ review.title }}</div>
+                  <div class="text-muted" style="font-size:.75rem">{{ review.content|truncatechars:60 }}</div>
+                </td>
+                <td class="align-middle text-warning">{% for i in "12345" %}{% if forloop.counter <= review.rating %}<i class="fas fa-star" style="font-size:.75rem"></i>{% else %}<i class="far fa-star text-muted" style="font-size:.75rem"></i>{% endif %}{% endfor %}</td>
+                <td class="align-middle small">
+                  {% if review.destination %}<span class="badge bg-primary">{{ review.destination.name }}</span>{% endif %}
+                  {% if review.hotel %}<span class="badge bg-info text-dark">{{ review.hotel.name }}</span>{% endif %}
+                  {% if review.tour_package %}<span class="badge bg-success">{{ review.tour_package.name }}</span>{% endif %}
+                </td>
+                <td class="align-middle"><span class="badge bg-{% if review.is_approved %}success{% else %}warning text-dark{% endif %} rounded-pill">{% if review.is_approved %}Approved{% else %}Pending{% endif %}</span></td>
+                <td class="text-muted small align-middle">{{ review.created_at|date:"d M Y" }}</td>
+                <td class="align-middle">
+                  <div class="d-flex gap-1">
+                    <a href="{% url 'admin_review_approve' review.pk %}" class="btn btn-sm btn-{% if review.is_approved %}outline-warning{% else %}outline-success{% endif %} rounded-pill" title="{% if review.is_approved %}Unapprove{% else %}Approve{% endif %}"><i class="fas fa-{% if review.is_approved %}eye-slash{% else %}check{% endif %}"></i></a>
+                    <a href="{% url 'admin_review_delete' review.pk %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this review?')"><i class="fas fa-trash"></i></a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-4">No reviews found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'admin_base.html' %}
+{% block title %}Confirm Delete – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9 d-flex align-items-center justify-content-center" style="min-height:70vh">
+      <div class="card p-5 text-center shadow-sm" style="max-width:500px">
+        <div class="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width:80px;height:80px">
+          <i class="fas fa-trash-alt fa-2x text-danger"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Delete {{ type }}</h4>
+        <p class="text-muted mb-4">Are you sure you want to delete <strong>{{ obj }}</strong>? This action cannot be undone.</p>
+        <form method="post" class="d-flex gap-3 justify-content-center">
+          {% csrf_token %}
+          <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+            <i class="fas fa-trash me-2"></i>Yes, Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

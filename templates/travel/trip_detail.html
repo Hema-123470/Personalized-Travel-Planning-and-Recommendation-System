@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}{{ trip.title }} – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h4 class="fw-bold mb-1">{{ trip.title }}</h4>
+            <p class="text-muted mb-0"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ trip.destination.name }}, {{ trip.destination.country }}</p>
+          </div>
+          <span class="badge bg-{% if trip.status == 'planning' %}warning text-dark{% elif trip.status == 'confirmed' %}success{% else %}secondary{% endif %} rounded-pill px-3 py-2">{{ trip.status|title }}</span>
+        </div>
+        <div class="row g-3 mb-4 text-center">
+          <div class="col-md-3 col-6">
+            <div class="bg-primary bg-opacity-10 rounded-xl p-3">
+              <i class="fas fa-calendar text-primary mb-1"></i>
+              <div class="fw-bold small">{{ trip.start_date }}</div>
+              <div class="text-muted" style="font-size:.7rem">Start Date</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-danger bg-opacity-10 rounded-xl p-3">
+              <i class="fas fa-calendar-check text-danger mb-1"></i>
+              <div class="fw-bold small">{{ trip.end_date }}</div>
+              <div class="text-muted" style="font-size:.7rem">End Date</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-success bg-opacity-10 rounded-xl p-3">
+              <i class="fas fa-sun text-success mb-1"></i>
+              <div class="fw-bold">{{ trip.duration_days }} Days</div>
+              <div class="text-muted" style="font-size:.7rem">Duration</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="bg-warning bg-opacity-10 rounded-xl p-3">
+              <i class="fas fa-users text-warning mb-1"></i>
+              <div class="fw-bold">{{ trip.number_of_travelers }}</div>
+              <div class="text-muted" style="font-size:.7rem">Travelers</div>
+            </div>
+          </div>
+        </div>
+        {% if trip.budget > 0 %}
+        <div class="alert alert-info py-2 small"><i class="fas fa-wallet me-2"></i>Budget: ₹{{ trip.budget|floatformat:0 }}</div>
+        {% endif %}
+        {% if trip.notes %}
+        <h6 class="fw-semibold mb-2">Notes</h6>
+        <p class="text-muted">{{ trip.notes }}</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-4 mb-3">
+        <h6 class="fw-bold mb-3">Actions</h6>
+        <div class="d-grid gap-2">
+          <a href="{% url 'ai_itinerary' %}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-magic me-2"></i>Generate AI Itinerary</a>
+          <a href="{% url 'destination_detail' trip.destination.slug %}" class="btn btn-outline-success rounded-pill"><i class="fas fa-globe me-2"></i>View Destination</a>
+          <a href="{% url 'ai_cost_estimator' %}" class="btn btn-outline-warning rounded-pill"><i class="fas fa-calculator me-2"></i>Estimate Cost</a>
+          <a href="{% url 'delete_trip' trip.id %}" class="btn btn-outline-danger rounded-pill" onclick="return confirm('Delete this trip plan?')"><i class="fas fa-trash me-2"></i>Delete Trip</a>
+        </div>
+      </div>
+      {% if trip.destination.image %}
+      <div class="card overflow-hidden">
+        <img src="{{ trip.destination.image.url }}" class="card-img-top" style="height:180px;object-fit:cover" alt="{{ trip.destination.name }}">
+        <div class="card-body p-3">
+          <div class="fw-semibold">{{ trip.destination.name }}</div>
+          <small class="text-muted">{{ trip.destination.country }}</small>
+          <div class="text-warning small mt-1">★ {{ trip.destination.rating }}</div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

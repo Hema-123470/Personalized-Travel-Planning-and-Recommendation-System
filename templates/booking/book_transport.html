@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Book Transport – {{ transport.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-7">
+      <div class="card p-4">
+        <h4 class="fw-bold mb-4"><i class="fas fa-bus me-2 text-primary"></i>Book Transport</h4>
+        <div class="p-3 bg-light rounded-xl mb-4">
+          <h5 class="fw-bold mb-1">{{ transport.name }}</h5>
+          <div class="text-muted small"><i class="fas fa-route me-1 text-primary"></i>{{ transport.from_location }} → {{ transport.to_location }}</div>
+          {% if transport.duration %}<div class="text-muted small"><i class="fas fa-clock me-1"></i>{{ transport.duration }}</div>{% endif %}
+          <div class="fw-bold text-primary mt-1">₹{{ transport.price|floatformat:0 }}/person</div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Travel Date *</label>
+              {{ form.travel_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Number of Persons</label>
+              {{ form.number_of_guests }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Payment Method</label>
+              {{ form.payment_method }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Special Requests</label>
+              {{ form.special_requests }}
+            </div>
+          </div>
+          {% if form.non_field_errors %}<div class="alert alert-danger small mt-3 py-2">{{ form.non_field_errors|join:"" }}</div>{% endif %}
+          <div class="d-flex gap-2 mt-3">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">Back</a>
+            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold flex-grow-1">
+              <i class="fas fa-ticket-alt me-2"></i>Confirm Booking
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

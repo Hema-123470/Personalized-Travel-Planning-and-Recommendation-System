@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Book Hotel – {{ hotel.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-7">
+      <div class="card p-4">
+        <h4 class="fw-bold mb-4"><i class="fas fa-hotel me-2 text-primary"></i>Book Hotel</h4>
+        <div class="d-flex gap-3 align-items-center p-3 bg-light rounded-xl mb-4">
+          {% if hotel.image %}<img src="{{ hotel.image.url }}" class="rounded" width="80" height="80" style="object-fit:cover">{% endif %}
+          <div>
+            <h5 class="fw-bold mb-1">{{ hotel.name }}</h5>
+            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ hotel.destination.name }}</div>
+            <div>{% for i in "12345" %}<i class="fas fa-star {% if forloop.counter <= hotel.stars %}text-warning{% else %}text-muted{% endif %}" style="font-size:.7rem"></i>{% endfor %}</div>
+            <div class="fw-bold text-primary">₹{{ hotel.price_per_night|floatformat:0 }}/night</div>
+          </div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Check-in Date *</label>
+              {{ form.check_in_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Check-out Date *</label>
+              {{ form.check_out_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Number of Guests</label>
+              {{ form.number_of_guests }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Payment Method</label>
+              {{ form.payment_method }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Special Requests</label>
+              {{ form.special_requests }}
+            </div>
+          </div>
+          {% if form.non_field_errors %}<div class="alert alert-danger small mt-3 py-2">{{ form.non_field_errors|join:"" }}</div>{% endif %}
+          <div class="alert alert-info small mt-3 py-2">
+            <i class="fas fa-info-circle me-1"></i><strong>Price Breakdown:</strong> Hotel price × Nights × Guests + 18% GST. Final price shown in booking confirmation.
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <a href="{% url 'hotel_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Back</a>
+            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold flex-grow-1">
+              <i class="fas fa-calendar-check me-2"></i>Confirm Booking
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

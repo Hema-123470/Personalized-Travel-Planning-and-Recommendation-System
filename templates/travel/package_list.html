@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Tour Packages – AI Travel Planner{% endblock %}
+{% block content %}
+<section class="py-4" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">
+  <div class="container text-white">
+    <h2 class="fw-bold mb-1">Tour Packages</h2>
+    <p class="text-white-75 mb-3">Curated experiences for every traveler</p>
+    <form method="get" class="row g-2">
+      <div class="col-md-3"><input type="text" name="search" value="{{ search }}" class="form-control border-0" placeholder="Search packages..."></div>
+      <div class="col-md-3">
+        <select name="destination" class="form-select border-0">
+          <option value="">All Destinations</option>
+          {% for d in destinations %}<option value="{{ d.id }}" {% if request.GET.destination == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="difficulty" class="form-select border-0">
+          <option value="">Difficulty</option>
+          <option value="easy" {% if request.GET.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+          <option value="moderate" {% if request.GET.difficulty == 'moderate' %}selected{% endif %}>Moderate</option>
+          <option value="challenging" {% if request.GET.difficulty == 'challenging' %}selected{% endif %}>Challenging</option>
+        </select>
+      </div>
+      <div class="col-md-2"><input type="number" name="max_price" value="{{ request.GET.max_price }}" class="form-control border-0" placeholder="Max price/person"></div>
+      <div class="col-md-1"><input type="number" name="duration" value="{{ request.GET.duration }}" class="form-control border-0" placeholder="Days ≤"></div>
+      <div class="col-md-1"><button type="submit" class="btn btn-dark w-100 rounded-pill">Go</button></div>
+    </form>
+  </div>
+</section>
+<div class="container py-4">
+  <div class="row g-4">
+    {% for pkg in packages %}
+    <div class="col-xl-4 col-md-6">
+      <div class="card h-100">
+        <div class="position-relative">
+          {% if pkg.image %}<img src="{{ pkg.image.url }}" class="card-img-top" style="height:210px;object-fit:cover" alt="{{ pkg.name }}">
+          {% else %}<div class="card-img-top bg-gradient-primary d-flex align-items-center justify-content-center" style="height:210px"><i class="fas fa-suitcase fa-4x text-white opacity-50"></i></div>{% endif %}
+          {% if pkg.discount_percent > 0 %}
+          <span class="discount-badge position-absolute top-0 end-0 m-2">{{ pkg.discount_percent }}% OFF</span>{% endif %}
+          {% if pkg.is_featured %}<span class="position-absolute top-0 start-0 m-2 badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Featured</span>{% endif %}
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title fw-bold mb-1">{{ pkg.name }}</h5>
+          <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ pkg.destination.name }}</p>
+          <div class="d-flex gap-3 small text-muted mb-2">
+            <span><i class="fas fa-calendar me-1"></i>{{ pkg.duration_days }} Days</span>
+            <span><i class="fas fa-users me-1"></i>Max {{ pkg.max_group_size }}</span>
+            <span class="badge bg-{% if pkg.difficulty == 'easy' %}success{% elif pkg.difficulty == 'moderate' %}warning text-dark{% else %}danger{% endif %}">{{ pkg.difficulty|title }}</span>
+          </div>
+          <p class="card-text text-muted small flex-grow-1">{{ pkg.description|truncatechars:100 }}</p>
+          <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+            <div>
+              {% if pkg.discount_percent > 0 %}<small class="text-muted text-decoration-line-through">₹{{ pkg.price_per_person|floatformat:0 }}</small><br>{% endif %}
+              <span class="price-tag">₹{{ pkg.get_discounted_price|floatformat:0 }}</span>
+              <span class="text-muted small">/person</span>
+            </div>
+            <div class="d-flex gap-1">
+              <a href="{% url 'package_detail' pkg.slug %}" class="btn btn-outline-primary btn-sm rounded-pill">Details</a>
+              <a href="{% url 'book_package' pkg.id %}" class="btn btn-primary btn-sm rounded-pill">Book</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5"><i class="fas fa-suitcase fa-4x text-muted mb-3"></i><h5 class="text-muted">No packages found.</h5></div>
+    {% endfor %}
+  </div>
+  {% if packages.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if packages.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ packages.previous_page_number }}"><i class="fas fa-chevron-left"></i></a></li>{% endif %}
+      {% for num in packages.paginator.page_range %}<li class="page-item {% if packages.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+      {% if packages.has_next %}<li class="page-item"><a class="page-link" href="?page={{ packages.next_page_number }}"><i class="fas fa-chevron-right"></i></a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

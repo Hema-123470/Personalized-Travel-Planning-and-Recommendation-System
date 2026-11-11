@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Attractions – AI Travel Planner{% endblock %}
+{% block content %}
+<section class="py-4" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">
+  <div class="container text-white">
+    <h2 class="fw-bold mb-1">Explore Attractions</h2>
+    <p class="text-white-75 mb-3">Discover top attractions, monuments, and experiences</p>
+    <form method="get" class="row g-2">
+      <div class="col-md-4">
+        <select name="destination" class="form-select border-0">
+          <option value="">All Destinations</option>
+          {% for d in destinations %}<option value="{{ d.id }}" {% if request.GET.destination == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="type" class="form-select border-0">
+          <option value="">All Types</option>
+          <option value="museum">Museum</option>
+          <option value="beach">Beach</option>
+          <option value="mountain">Mountain</option>
+          <option value="temple">Temple/Religious</option>
+          <option value="park">National Park</option>
+          <option value="monument">Monument/Historical</option>
+          <option value="shopping">Shopping</option>
+          <option value="entertainment">Entertainment</option>
+          <option value="restaurant">Restaurant</option>
+        </select>
+      </div>
+      <div class="col-md-3"><button type="submit" class="btn btn-dark w-100 rounded-pill">Filter</button></div>
+      <div class="col-md-2"><a href="{% url 'attraction_list' %}" class="btn btn-outline-dark w-100 rounded-pill">Reset</a></div>
+    </form>
+  </div>
+</section>
+<div class="container py-4">
+  <div class="row g-4">
+    {% for attr in attractions %}
+    <div class="col-xl-3 col-md-6">
+      <div class="card h-100">
+        {% if attr.image %}<img src="{{ attr.image.url }}" class="card-img-top" style="height:190px;object-fit:cover" alt="{{ attr.name }}">
+        {% else %}<div class="card-img-top bg-success d-flex align-items-center justify-content-center" style="height:190px"><i class="fas fa-camera fa-3x text-white opacity-50"></i></div>{% endif %}
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <span class="badge bg-info text-dark small">{{ attr.get_attraction_type_display }}</span>
+            {% if attr.entry_fee > 0 %}<span class="fw-bold text-primary small">₹{{ attr.entry_fee|floatformat:0 }}</span>
+            {% else %}<span class="badge bg-success small">Free</span>{% endif %}
+          </div>
+          <h6 class="fw-bold mb-1">{{ attr.name }}</h6>
+          <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ attr.destination.name }}</p>
+          <p class="text-muted small">{{ attr.description|truncatechars:80 }}</p>
+          {% if attr.opening_hours %}<div class="small text-muted"><i class="fas fa-clock me-1"></i>{{ attr.opening_hours }}</div>{% endif %}
+          {% if attr.rating > 0 %}<div class="text-warning small mt-1">★ {{ attr.rating }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5"><i class="fas fa-camera fa-4x text-muted mb-3"></i><h5 class="text-muted">No attractions found.</h5></div>
+    {% endfor %}
+  </div>
+  {% if attractions.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if attractions.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ attractions.previous_page_number }}">‹</a></li>{% endif %}
+      {% for n in attractions.paginator.page_range %}<li class="page-item {% if attractions.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>{% endfor %}
+      {% if attractions.has_next %}<li class="page-item"><a class="page-link" href="?page={{ attractions.next_page_number }}">›</a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

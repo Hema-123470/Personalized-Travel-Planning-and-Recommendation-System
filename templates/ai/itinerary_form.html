@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}AI Itinerary Generator{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;background:linear-gradient(135deg,#4facfe,#00f2fe)">
+            <i class="fas fa-route fa-2x text-white"></i>
+          </div>
+          <h3 class="fw-bold">AI Itinerary Generator</h3>
+          <p class="text-muted">Generate a personalized day-by-day travel plan in seconds.</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Select Destination *</label>
+              <select name="destination" class="form-select" required>
+                <option value="">Choose a destination...</option>
+                {% for d in destinations %}<option value="{{ d.id }}">{{ d.name }}, {{ d.country }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Duration (Days) *</label>
+              <input type="number" name="duration" class="form-control" value="5" min="1" max="30" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Budget (₹) (Optional)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" name="budget" class="form-control" placeholder="e.g. 30000">
+              </div>
+            </div>
+            <div class="col-12 mt-2">
+              <button type="submit" class="btn btn-info w-100 py-3 fw-semibold rounded-pill text-white fs-5">
+                <i class="fas fa-magic me-2"></i>Generate Itinerary
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

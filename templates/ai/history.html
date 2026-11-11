@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}AI Recommendation History{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h4 class="fw-bold mb-4"><i class="fas fa-history me-2 text-secondary"></i>AI Recommendation History</h4>
+  {% for h in history %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="fw-bold mb-1">{{ h.query }}</h6>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            {% if h.budget %}<span class="badge bg-success">Budget: ₹{{ h.budget|floatformat:0 }}</span>{% endif %}
+            {% if h.duration_days %}<span class="badge bg-info">{{ h.duration_days }} Days</span>{% endif %}
+            {% if h.preferred_climate %}<span class="badge bg-warning text-dark">{{ h.preferred_climate|title }}</span>{% endif %}
+            {% if h.travel_style %}<span class="badge bg-secondary">{{ h.travel_style|title }}</span>{% endif %}
+          </div>
+          {% if h.recommended_destinations.all %}
+          <div class="text-muted small">
+            Recommended: {% for d in h.recommended_destinations.all|slice:":3" %}<a href="{% url 'destination_detail' d.slug %}" class="text-decoration-none">{{ d.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% if h.recommended_destinations.count > 3 %}and {{ h.recommended_destinations.count|add:"-3" }} more{% endif %}
+          </div>
+          {% endif %}
+        </div>
+        <small class="text-muted">{{ h.created_at|date:"d M Y, H:i" }}</small>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="card p-5 text-center border-0 bg-light">
+    <i class="fas fa-robot fa-4x text-muted mb-3"></i>
+    <h5 class="text-muted">No AI recommendations yet.</h5>
+    <a href="{% url 'ai_recommendations' %}" class="btn btn-primary rounded-pill mt-2">Get Recommendations</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'admin_base.html' %}
+{% block title %}Manage Bookings – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-calendar-check me-2 text-primary"></i>All Bookings</h5>
+        <div class="bg-success text-white rounded-pill px-3 py-1 fw-semibold small">Revenue: ₹{{ total_revenue|floatformat:0 }}</div>
+      </div>
+      <div class="card mb-3 p-3">
+        <form method="get" class="d-flex gap-2 flex-wrap">
+          <select name="status" class="form-select form-select-sm" style="width:140px">
+            <option value="">All Status</option>
+            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="confirmed" {% if request.GET.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+          </select>
+          <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-3">Filter</button>
+          <a href="{% url 'admin_bookings' %}" class="btn btn-outline-secondary btn-sm rounded-pill">Reset</a>
+        </form>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Reference</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Payment</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for booking in bookings %}
+              <tr>
+                <td class="small fw-bold text-primary align-middle">{{ booking.booking_reference }}</td>
+                <td class="small align-middle"><div class="fw-semibold">{{ booking.user.get_full_name|default:booking.user.username }}</div><div class="text-muted" style="font-size:.7rem">{{ booking.user.email }}</div></td>
+                <td class="align-middle"><span class="badge bg-{% if booking.booking_type == 'hotel' %}info text-dark{% elif booking.booking_type == 'package' %}success{% else %}warning text-dark{% endif %} rounded-pill">{{ booking.booking_type|title }}</span></td>
+                <td class="fw-bold text-primary small align-middle">₹{{ booking.total_amount|floatformat:0 }}</td>
+                <td class="align-middle"><span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'pending' %}warning text-dark{% elif booking.status == 'cancelled' %}danger{% else %}info text-dark{% endif %} rounded-pill">{{ booking.status|title }}</span></td>
+                <td class="align-middle"><span class="badge bg-{% if booking.payment_status == 'paid' %}success{% elif booking.payment_status == 'refunded' %}info text-dark{% else %}warning text-dark{% endif %} rounded-pill">{{ booking.payment_status|title }}</span></td>
+                <td class="text-muted small align-middle">
+                  {% if booking.check_in_date %}
+                    <div class="fw-semibold text-dark">{{ booking.check_in_date|date:"d M Y" }}</div>
+                    {% if booking.check_out_date %}<div class="text-muted" style="font-size:.7rem">→ {{ booking.check_out_date|date:"d M Y" }}</div>{% endif %}
+                  {% elif booking.travel_date %}
+                    <div class="fw-semibold text-dark">{{ booking.travel_date|date:"d M Y" }}</div>
+                  {% else %}
+                    <span class="text-muted">{{ booking.created_at|date:"d M Y" }}</span>
+                  {% endif %}
+                  <div class="text-muted" style="font-size:.68rem">Booked: {{ booking.created_at|date:"d M Y" }}</div>
+                </td>
+                <td class="align-middle"><a href="{% url 'admin_booking_detail' booking.id %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-eye"></i></a></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-4">No bookings found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if bookings.has_other_pages %}
+        <div class="p-3 d-flex justify-content-center"><ul class="pagination mb-0">{% if bookings.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ bookings.previous_page_number }}&status={{ request.GET.status }}">‹</a></li>{% endif %}{% for n in bookings.paginator.page_range %}<li class="page-item {% if bookings.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}&status={{ request.GET.status }}">{{ n }}</a></li>{% endfor %}{% if bookings.has_next %}<li class="page-item"><a class="page-link" href="?page={{ bookings.next_page_number }}&status={{ request.GET.status }}">›</a></li>{% endif %}</ul></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

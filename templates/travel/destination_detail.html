@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ destination.name }} – AI Travel Planner{% endblock %}
+
+{% block extra_css %}
+<style>.gallery-img{height:200px;object-fit:cover;border-radius:8px;cursor:pointer;transition:transform .3s}.gallery-img:hover{transform:scale(1.03)}</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="position-relative" style="height:450px;overflow:hidden">
+  {% if destination.image %}
+  <img src="{{ destination.image.url }}" class="w-100 h-100" style="object-fit:cover" alt="{{ destination.name }}">
+  {% else %}
+  <div class="w-100 h-100" style="background:linear-gradient(135deg,#667eea,#764ba2)"></div>
+  {% endif %}
+  <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.2))"></div>
+  <div class="position-absolute bottom-0 start-0 text-white p-4 p-md-5">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      {% if destination.category %}<span class="badge bg-primary">{{ destination.category.name }}</span>{% endif %}
+      {% if destination.is_featured %}<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Featured</span>{% endif %}
+    </div>
+    <h1 class="fw-bold display-5 mb-1">{{ destination.name }}</h1>
+    <p class="fs-5 mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ destination.city }}{% if destination.state %}, {{ destination.state }}{% endif %}, {{ destination.country }}</p>
+    <div class="d-flex flex-wrap gap-3 text-white-75 small">
+      <span><i class="fas fa-star text-warning me-1"></i>{{ destination.rating }} ({{ destination.total_reviews }} reviews)</span>
+      <span><i class="fas fa-sun me-1"></i>{{ destination.get_climate_display }}</span>
+      <span><i class="fas fa-eye me-1"></i>{{ destination.views_count }} views</span>
+    </div>
+  </div>
+  <div class="position-absolute top-0 end-0 p-3 d-flex gap-2">
+    {% if user.is_authenticated %}
+    <a href="{% url 'toggle_favorite' destination.id %}" class="btn btn-{% if is_favorited %}danger{% else %}outline-light{% endif %} rounded-circle" title="{% if is_favorited %}Remove from Favorites{% else %}Add to Favorites{% endif %}" style="width:44px;height:44px;line-height:1.6">
+      <i class="{% if is_favorited %}fas{% else %}far{% endif %} fa-heart"></i>
+    </a>
+    <a href="{% url 'plan_trip' %}?destination={{ destination.id }}" class="btn btn-primary rounded-pill px-3"><i class="fas fa-route me-1"></i>Plan Trip</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Quick Info -->
+      <div class="card p-4 mb-4">
+        <div class="row g-3 text-center">
+          <div class="col-6 col-md-3">
+            <i class="fas fa-rupee-sign fa-2x text-primary mb-2"></i>
+            <div class="fw-bold">₹{{ destination.average_budget|floatformat:0 }}</div>
+            <small class="text-muted">Avg. Budget</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <i class="fas fa-sun fa-2x text-warning mb-2"></i>
+            <div class="fw-bold">{{ destination.get_climate_display }}</div>
+            <small class="text-muted">Climate</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <i class="fas fa-calendar fa-2x text-success mb-2"></i>
+            <div class="fw-bold" style="font-size:.85rem">{{ destination.best_time_to_visit|default:"All Year" }}</div>
+            <small class="text-muted">Best Time</small>
+          </div>
+          <div class="col-6 col-md-3">
+            <i class="fas fa-star fa-2x text-warning mb-2"></i>
+            <div class="fw-bold">{{ destination.rating }}/5</div>
+            <small class="text-muted">Rating</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-primary"></i>About {{ destination.name }}</h5>
+        <p class="text-muted" style="line-height:1.8">{{ destination.description }}</p>
+      </div>
+
+      <!-- Gallery -->
+      {% if destination.gallery_image1 or destination.gallery_image2 or destination.gallery_image3 %}
+      <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-images me-2 text-primary"></i>Gallery</h5>
+        <div class="row g-2">
+          {% if destination.gallery_image1 %}
+          <div class="col-4"><img src="{{ destination.gallery_image1.url }}" class="gallery-img w-100" alt="Gallery"></div>
+          {% endif %}
+          {% if destination.gallery_image2 %}
+          <div class="col-4"><img src="{{ destination.gallery_image2.url }}" class="gallery-img w-100" alt="Gallery"></div>
+          {% endif %}
+          {% if destination.gallery_image3 %}
+          <div class="col-4"><img src="{{ destination.gallery_image3.url }}" class="gallery-img w-100" alt="Gallery"></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Attractions -->
+      {% if attractions %}
+      <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-camera me-2 text-primary"></i>Top Attractions</h5>
+        <div class="row g-3">
+          {% for attraction in attractions %}
+          <div class="col-md-6">
+            <div class="d-flex gap-3 align-items-start p-3 bg-light rounded-xl">
+              {% if attraction.image %}
+              <img src="{{ attraction.image.url }}" class="rounded" width="60" height="60" style="object-fit:cover">
+              {% else %}
+              <div class="rounded bg-primary d-flex align-items-center justify-content-center text-white" style="width:60px;height:60px;min-width:60px"><i class="fas fa-camera"></i></div>
+              {% endif %}
+              <div>
+                <div class="fw-semibold small">{{ attraction.name }}</div>
+                <span class="badge bg-light text-dark border small">{{ attraction.get_attraction_type_display }}</span>
+                {% if attraction.entry_fee > 0 %}
+                <div class="small text-muted mt-1">Entry: ₹{{ attraction.entry_fee|floatformat:0 }}</div>
+                {% else %}
+                <div class="small text-success mt-1">Free Entry</div>
+                {% endif %}
+                {% if attraction.opening_hours %}<div class="small text-muted"><i class="fas fa-clock me-1"></i>{{ attraction.opening_hours }}</div>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Hotels -->
+      {% if hotels %}
+      <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="fas fa-hotel me-2 text-primary"></i>Hotels in {{ destination.name }}</h5>
+          <a href="{% url 'hotel_list' %}?destination={{ destination.id }}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+        </div>
+        <div class="row g-3">
+          {% for hotel in hotels|slice:":4" %}
+          <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+              {% if hotel.image %}
+              <img src="{{ hotel.image.url }}" class="card-img-top" style="height:140px;object-fit:cover" alt="{{ hotel.name }}">
+              {% else %}
+              <div class="card-img-top bg-info d-flex align-items-center justify-content-center" style="height:140px"><i class="fas fa-hotel fa-2x text-white opacity-50"></i></div>
+              {% endif %}
+              <div class="card-body p-3">
+                <h6 class="fw-bold mb-1">{{ hotel.name }}</h6>
+                <div class="mb-1">{% for i in "12345" %}<i class="fas fa-star {% if forloop.counter <= hotel.stars %}text-warning{% else %}text-muted{% endif %}" style="font-size:.65rem"></i>{% endfor %}</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div><span class="fw-bold text-primary">₹{{ hotel.price_per_night|floatformat:0 }}</span><span class="text-muted small">/night</span></div>
+                  <a href="{% url 'book_hotel' hotel.id %}" class="btn btn-primary btn-sm rounded-pill px-3">Book</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Transport -->
+      {% if transports %}
+      <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-bus me-2 text-primary"></i>Transport Options</h5>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Type</th><th>Name</th><th>Route</th><th>Duration</th><th>Price</th><th></th></tr></thead>
+            <tbody>
+              {% for t in transports %}
+              <tr>
+                <td><span class="badge bg-{% if t.transport_type == 'flight' %}primary{% elif t.transport_type == 'train' %}success{% elif t.transport_type == 'bus' %}warning text-dark{% else %}info{% endif %}">{{ t.get_transport_type_display }}</span></td>
+                <td class="fw-semibold small">{{ t.name }}</td>
+                <td class="small text-muted">{{ t.from_location }} → {{ t.to_location }}</td>
+                <td class="small">{{ t.duration|default:"N/A" }}</td>
+                <td class="fw-bold text-primary">₹{{ t.price|floatformat:0 }}</td>
+                <td><a href="{% url 'book_transport' t.id %}" class="btn btn-sm btn-outline-primary rounded-pill">Book</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Tour Packages -->
+      {% if packages %}
+      <div class="card p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="fas fa-suitcase me-2 text-primary"></i>Available Packages</h5>
+        <div class="row g-3">
+          {% for pkg in packages|slice:":3" %}
+          <div class="col-md-4">
+            <div class="card border h-100">
+              {% if pkg.image %}
+              <img src="{{ pkg.image.url }}" class="card-img-top" style="height:130px;object-fit:cover" alt="{{ pkg.name }}">
+              {% endif %}
+              <div class="card-body p-3">
+                <h6 class="fw-semibold mb-1">{{ pkg.name }}</h6>
+                <div class="small text-muted mb-2"><i class="fas fa-calendar me-1"></i>{{ pkg.duration_days }} Days</div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-bold text-primary">₹{{ pkg.get_discounted_price|floatformat:0 }}</span>
+                  <a href="{% url 'package_detail' pkg.slug %}" class="btn btn-sm btn-primary rounded-pill">View</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Reviews -->
+      <div class="card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="fas fa-star me-2 text-warning"></i>Reviews</h5>
+          <span class="badge bg-warning text-dark">★ {{ destination.rating }} / 5</span>
+        </div>
+        {% for review in reviews|slice:":5" %}
+        <div class="border-bottom pb-3 mb-3">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <div class="fw-semibold small">{{ review.user.get_full_name|default:review.user.username }}</div>
+            <div class="text-warning small">{% for i in "12345" %}<i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>{% endfor %}</div>
+          </div>
+          <div class="fw-semibold small mb-1">{{ review.title }}</div>
+          <p class="text-muted small mb-1">{{ review.content }}</p>
+          <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center py-3">No reviews yet. Be the first to review!</p>
+        {% endfor %}
+        {% if user.is_authenticated %}
+        <div class="mt-3">
+          <h6 class="fw-semibold mb-2">Write a Review</h6>
+          <form method="post">
+            {% csrf_token %}
+            <div class="row g-2">
+              <div class="col-md-3">{{ review_form.rating }}</div>
+              <div class="col-md-9">{{ review_form.title }}</div>
+              <div class="col-12">{{ review_form.content }}</div>
+              <div class="col-12"><button type="submit" class="btn btn-primary rounded-pill px-4">Submit Review</button></div>
+            </div>
+          </form>
+        </div>
+        {% else %}
+        <div class="text-center mt-2"><a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm rounded-pill">Login to Write a Review</a></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Book Now -->
+      <div class="card p-4 mb-3 border-primary border-2">
+        <h5 class="fw-bold mb-3 text-primary text-center"><i class="fas fa-calendar-check me-2"></i>Plan This Trip</h5>
+        <div class="d-grid gap-2">
+          {% if packages %}
+          <a href="{% url 'book_package' packages.0.id %}" class="btn btn-primary rounded-pill fw-semibold"><i class="fas fa-suitcase me-2"></i>Book Tour Package</a>
+          {% endif %}
+          {% if user.is_authenticated %}
+          <a href="{% url 'plan_trip' %}?destination={{ destination.id }}" class="btn btn-outline-success rounded-pill"><i class="fas fa-route me-2"></i>Create Trip Plan</a>
+          <a href="{% url 'ai_itinerary' %}" class="btn btn-outline-warning rounded-pill"><i class="fas fa-magic me-2"></i>AI Itinerary Generator</a>
+          <a href="{% url 'ai_cost_estimator' %}" class="btn btn-outline-info rounded-pill"><i class="fas fa-calculator me-2"></i>Estimate Cost</a>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-success rounded-pill"><i class="fas fa-sign-in-alt me-2"></i>Login to Book</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Weather -->
+      <div class="card p-4 mb-3">
+        <h6 class="fw-bold mb-3"><i class="fas fa-cloud-sun me-2 text-info"></i>Check Weather</h6>
+        <a href="{% url 'ai_weather' %}?city={{ destination.city }}" class="btn btn-outline-info w-100 rounded-pill">View Weather for {{ destination.city }}</a>
+      </div>
+
+      <!-- Map -->
+      {% if destination.latitude and destination.longitude %}
+      <div class="card p-4 mb-3">
+        <h6 class="fw-bold mb-3"><i class="fas fa-map me-2 text-success"></i>Location</h6>
+        <div class="rounded-xl overflow-hidden mb-2" style="height:220px">
+          <iframe
+            width="100%"
+            height="220"
+            style="border:0;border-radius:10px"
+            loading="lazy"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q={{ destination.name|urlencode }},{{ destination.city|urlencode }},{{ destination.country|urlencode }}&output=embed">
+          </iframe>
+        </div>
+        <div class="small text-muted text-center mb-2">{{ destination.city }}, {{ destination.country }}</div>
+        <a href="https://www.google.com/maps/search/{{ destination.name|urlencode }}+{{ destination.city|urlencode }}+{{ destination.country|urlencode }}" target="_blank" class="btn btn-outline-success btn-sm w-100 rounded-pill">
+          <i class="fas fa-external-link-alt me-1"></i>Open in Google Maps
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Related Destinations -->
+      {% if related %}
+      <div class="card p-4">
+        <h6 class="fw-bold mb-3"><i class="fas fa-globe me-2 text-primary"></i>Similar Destinations</h6>
+        {% for dest in related %}
+        <a href="{% url 'destination_detail' dest.slug %}" class="d-flex gap-3 align-items-center text-decoration-none text-dark mb-3 pb-2 {% if not forloop.last %}border-bottom{% endif %}">
+          {% if dest.image %}
+          <img src="{{ dest.image.url }}" class="rounded" width="55" height="55" style="object-fit:cover">
+          {% else %}
+          <div class="rounded bg-primary d-flex align-items-center justify-content-center" style="width:55px;height:55px;min-width:55px"><i class="fas fa-mountain text-white"></i></div>
+          {% endif %}
+          <div>
+            <div class="fw-semibold small">{{ dest.name }}</div>
+            <small class="text-muted">{{ dest.country }}</small>
+            <div class="text-warning small">★ {{ dest.rating }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'admin_base.html' %}
+{% block title %}Manage Attractions – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-camera me-2 text-primary"></i>Manage Attractions</h5>
+        <a href="{% url 'admin_attraction_create' %}" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i>Add Attraction</a>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Image</th><th>Name</th><th>Destination</th><th>Type</th><th>Entry Fee</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for attr in attractions %}
+              <tr>
+                <td>{% if attr.image %}<img src="{{ attr.image.url }}" class="rounded" width="55" height="45" style="object-fit:cover">{% else %}<div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:55px;height:45px"><i class="fas fa-camera text-muted"></i></div>{% endif %}</td>
+                <td class="fw-semibold align-middle">{{ attr.name }}</td>
+                <td class="text-muted small align-middle">{{ attr.destination.name }}</td>
+                <td class="align-middle"><span class="badge bg-info text-dark rounded-pill">{{ attr.get_attraction_type_display }}</span></td>
+                <td class="align-middle">{% if attr.entry_fee > 0 %}<span class="fw-bold text-primary small">₹{{ attr.entry_fee|floatformat:0 }}</span>{% else %}<span class="text-success small fw-semibold">Free</span>{% endif %}</td>
+                <td class="align-middle"><span class="badge bg-{% if attr.is_active %}success{% else %}secondary{% endif %} rounded-pill">{% if attr.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                <td class="align-middle">
+                  <div class="d-flex gap-1">
+                    <a href="{% url 'admin_attraction_edit' attr.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'admin_attraction_delete' attr.pk %}" class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-4">No attractions found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if attractions.has_other_pages %}
+        <div class="p-3 d-flex justify-content-center"><ul class="pagination mb-0">{% if attractions.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ attractions.previous_page_number }}">‹</a></li>{% endif %}{% for n in attractions.paginator.page_range %}<li class="page-item {% if attractions.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>{% endfor %}{% if attractions.has_next %}<li class="page-item"><a class="page-link" href="?page={{ attractions.next_page_number }}">›</a></li>{% endif %}</ul></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Book Package – {{ package.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-7">
+      <div class="card p-4">
+        <h4 class="fw-bold mb-4"><i class="fas fa-suitcase me-2 text-primary"></i>Book Tour Package</h4>
+        <div class="d-flex gap-3 align-items-center p-3 bg-light rounded-xl mb-4">
+          {% if package.image %}<img src="{{ package.image.url }}" class="rounded" width="80" height="80" style="object-fit:cover">{% endif %}
+          <div>
+            <h5 class="fw-bold mb-1">{{ package.name }}</h5>
+            <div class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ package.destination.name }}</div>
+            <div class="small text-muted"><i class="fas fa-calendar me-1"></i>{{ package.duration_days }} Days</div>
+            <div class="fw-bold text-primary">₹{{ package.get_discounted_price|floatformat:0 }}/person</div>
+          </div>
+        </div>
+        <form method="post" id="bookingForm">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Travel Date *</label>
+              {{ form.travel_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Number of Persons</label>
+              {{ form.number_of_guests }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Payment Method</label>
+              {{ form.payment_method }}
+            </div>
+
+            <!-- UPI Payment Section (shown when UPI is selected) -->
+            <div class="col-12" id="upiSection" style="display:none">
+              <div class="card border-primary border-2 p-4 rounded-xl">
+                <h6 class="fw-bold text-primary mb-3"><i class="fas fa-qrcode me-2"></i>Pay via UPI</h6>
+                <div class="row g-3 align-items-center">
+                  <!-- QR Code -->
+                  <div class="col-md-5 text-center">
+                    <div class="border rounded-xl p-3 bg-white d-inline-block">
+                      <!-- QR code generated using Google Charts API -->
+                      <img id="upiQrCode"
+                           src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=travelsystem@upi%26pn=Travel+Planner%26am={{ package.get_discounted_price|floatformat:0 }}%26cu=INR%26tn=Package+Booking"
+                           alt="UPI QR Code" width="180" height="180" class="rounded">
+                    </div>
+                    <div class="small text-muted mt-2">Scan with any UPI app</div>
+                    <div class="d-flex justify-content-center gap-2 mt-2">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/120px-UPI-Logo-vector.svg.png" height="22" alt="UPI">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/100px-Paytm_Logo_%28standalone%29.svg.png" height="22" alt="Paytm">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/100px-Google_Pay_Logo.svg.png" height="22" alt="GPay">
+                    </div>
+                  </div>
+                  <!-- UPI Details -->
+                  <div class="col-md-7">
+                    <div class="mb-3">
+                      <div class="text-muted small fw-semibold mb-1">UPI ID</div>
+                      <div class="input-group">
+                        <input type="text" class="form-control form-control-sm bg-light" value="travelsystem@upi" readonly id="upiId">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyUPI()">
+                          <i class="fas fa-copy"></i> Copy
+                        </button>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="text-muted small fw-semibold mb-1">Pay to Phone Number</div>
+                      <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fas fa-phone text-primary"></i></span>
+                        <input type="text" class="form-control form-control-sm bg-light" value="+91 98765 43210" readonly id="upiPhone">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="copyPhone()">
+                          <i class="fas fa-copy"></i> Copy
+                        </button>
+                      </div>
+                    </div>
+                    <div class="alert alert-warning py-2 small mb-2">
+                      <i class="fas fa-rupee-sign me-1"></i>
+                      Amount to pay: <strong id="upiAmount">₹{{ package.get_discounted_price|floatformat:0 }}</strong>
+                    </div>
+                    <div class="mb-2">
+                      <label class="form-label fw-semibold small">Enter UPI Transaction ID *</label>
+                      <input type="text" class="form-control form-control-sm" id="upiTransactionId" name="payment_reference"
+                             placeholder="e.g. 123456789012" maxlength="50">
+                      <div class="small text-muted mt-1">Find it in your UPI app after payment</div>
+                    </div>
+                    <div class="small text-muted">
+                      <i class="fas fa-shield-alt text-success me-1"></i>Secure 256-bit encrypted payment
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-semibold">Special Requests</label>
+              {{ form.special_requests }}
+            </div>
+          </div>
+          {% if form.non_field_errors %}<div class="alert alert-danger small mt-3 py-2">{{ form.non_field_errors|join:"" }}</div>{% endif %}
+          <div class="alert alert-info small mt-3 py-2">
+            <i class="fas fa-info-circle me-1"></i><strong>Price:</strong> ₹{{ package.get_discounted_price|floatformat:0 }} × Persons + 18% GST
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <a href="{% url 'package_detail' package.slug %}" class="btn btn-outline-secondary rounded-pill px-4">Back</a>
+            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-semibold flex-grow-1">
+              <i class="fas fa-calendar-check me-2"></i>Confirm Booking
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const paymentSelect = document.querySelector('[name="payment_method"]');
+  const upiSection = document.getElementById('upiSection');
+
+  function toggleUPI() {
+    if (paymentSelect.value === 'upi') {
+      upiSection.style.display = 'block';
+    } else {
+      upiSection.style.display = 'none';
+    }
+  }
+
+  paymentSelect.addEventListener('change', toggleUPI);
+  toggleUPI(); // run on load in case UPI is pre-selected
+
+  function copyUPI() {
+    navigator.clipboard.writeText('travelsystem@upi');
+    showToast('UPI ID copied!');
+  }
+
+  function copyPhone() {
+    navigator.clipboard.writeText('9876543210');
+    showToast('Phone number copied!');
+  }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'position-fixed bottom-0 end-0 m-4 alert alert-success py-2 px-3 small shadow';
+    toast.style.zIndex = 9999;
+    toast.innerHTML = '<i class="fas fa-check me-1"></i>' + msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}AI Travel Planner – Discover Your Next Adventure{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:90vh;display:flex;align-items:center;position:relative;overflow:hidden">
+  <div class="position-absolute inset-0 w-100 h-100" style="background:url('{% static "images/hero-bg.jpg" %}') center/cover no-repeat;opacity:.3"></div>
+  <div class="container py-5">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 text-white">
+        <div class="mb-3">
+          <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-semibold">
+            <i class="fas fa-robot me-1"></i>AI-Powered Travel Planning
+          </span>
+        </div>
+        <h1 class="hero-title text-white fw-bold mb-3">
+          Discover Your Perfect <span class="text-warning">Travel Experience</span>
+        </h1>
+        <p class="fs-5 mb-4 text-white-75">
+          Let AI plan your dream trip. Get personalized recommendations, smart itineraries, and real-time insights — all in one place.
+        </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{% url 'ai_recommendations' %}" class="btn btn-warning btn-lg fw-bold rounded-pill px-4 btn-glow">
+            <i class="fas fa-magic me-2"></i>Get AI Recommendations
+          </a>
+          <a href="{% url 'destination_list' %}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+            <i class="fas fa-globe me-2"></i>Explore Destinations
+          </a>
+        </div>
+        <div class="d-flex gap-4 mt-4">
+          <div class="text-center">
+            <div class="fw-bold fs-4 text-warning" data-counter="{{ total_destinations }}">{{ total_destinations }}</div>
+            <small class="text-white-50">Destinations</small>
+          </div>
+          <div class="text-center">
+            <div class="fw-bold fs-4 text-warning" data-counter="{{ total_packages }}">{{ total_packages }}</div>
+            <small class="text-white-50">Tour Packages</small>
+          </div>
+          <div class="text-center">
+            <div class="fw-bold fs-4 text-warning">AI</div>
+            <small class="text-white-50">Powered</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-search p-4">
+          <h5 class="text-white fw-semibold mb-3"><i class="fas fa-search me-2"></i>Quick Destination Search</h5>
+          <form action="{% url 'destination_list' %}" method="get">
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-0"><i class="fas fa-map-marker-alt text-primary"></i></span>
+                  <input type="text" name="search" class="form-control border-0" placeholder="Where do you want to go?">
+                </div>
+              </div>
+              <div class="col-6">
+                <select name="climate" class="form-select border-0">
+                  <option value="">Climate Type</option>
+                  <option value="tropical">Tropical</option>
+                  <option value="temperate">Temperate</option>
+                  <option value="arid">Arid/Desert</option>
+                  <option value="continental">Continental</option>
+                  <option value="polar">Polar</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <select name="sort" class="form-select border-0">
+                  <option value="-rating">Top Rated</option>
+                  <option value="average_budget">Budget Friendly</option>
+                  <option value="-created_at">Latest</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+                  <i class="fas fa-search me-2"></i>Search Destinations
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+{% if categories %}
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="section-header">
+      <p class="text-primary fw-semibold text-uppercase mb-1" style="font-size:.85rem;letter-spacing:1px">Browse by Type</p>
+      <h2>Explore Travel Categories</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="{% url 'destination_list' %}" class="category-pill active">
+        <i class="fas fa-globe"></i> All Destinations
+      </a>
+      {% for cat in categories %}
+      <a href="{% url 'destination_list' %}?category={{ cat.slug }}" class="category-pill">
+        <i class="{{ cat.icon }}"></i> {{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured Destinations -->
+{% if featured_destinations %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <p class="text-primary fw-semibold text-uppercase mb-1" style="font-size:.85rem;letter-spacing:1px">Top Picks</p>
+        <h2 class="mb-0">Featured Destinations</h2>
+        <div class="section-divider mx-0 mt-2"></div>
+      </div>
+      <a href="{% url 'destination_list' %}" class="btn btn-outline-primary rounded-pill">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for destination in featured_destinations %}
+      <div class="col-xl-4 col-md-6">
+        <div class="card destination-card h-100">
+          <div class="img-hover-zoom position-relative">
+            {% if destination.image %}
+            <img src="{{ destination.image.url }}" class="card-img-top" alt="{{ destination.name }}" style="height:240px;object-fit:cover">
+            {% else %}
+            <div class="card-img-top bg-gradient-primary d-flex align-items-center justify-content-center" style="height:240px">
+              <i class="fas fa-mountain fa-3x text-white opacity-50"></i>
+            </div>
+            {% endif %}
+            <div class="card-overlay"></div>
+            <span class="destination-badge"><i class="fas fa-star me-1"></i>Featured</span>
+            {% if destination.category %}
+            <span class="position-absolute top-0 end-0 m-2 badge bg-dark bg-opacity-75">{{ destination.category.name }}</span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h5 class="card-title fw-bold mb-1">{{ destination.name }}</h5>
+                <small class="text-muted"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ destination.city }}, {{ destination.country }}</small>
+              </div>
+              <div class="text-end">
+                <div class="text-warning fw-bold">★ {{ destination.rating }}</div>
+                <small class="text-muted">{{ destination.total_reviews }} reviews</small>
+              </div>
+            </div>
+            <p class="card-text text-muted small">{{ destination.short_description|default:destination.description|truncatechars:100 }}</p>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <div>
+                <span class="text-muted small">From</span>
+                <span class="fw-bold text-primary fs-5"> ₹{{ destination.average_budget|floatformat:0 }}</span>
+              </div>
+              <a href="{% url 'destination_detail' destination.slug %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                Explore <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- AI Features Banner -->
+<section class="py-5" style="background:linear-gradient(135deg,#0a0e1a,#1a1f35)">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6 text-white">
+        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill mb-3"><i class="fas fa-robot me-1"></i>AI Powered</span>
+        <h2 class="text-white fw-bold mb-3">Plan Smarter with AI Travel Assistant</h2>
+        <p class="text-white-50 mb-4">Our AI analyzes thousands of data points to give you the best personalized recommendations, budget plans, and day-wise itineraries.</p>
+        <div class="row g-3">
+          {% for feat in "123456"|make_list %}
+          {% if feat == "1" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-primary rounded p-2"><i class="fas fa-lightbulb"></i></div>
+              <span class="small">Smart Recommendations</span>
+            </div>
+          </div>
+          {% elif feat == "2" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-success rounded p-2"><i class="fas fa-route"></i></div>
+              <span class="small">Itinerary Generator</span>
+            </div>
+          </div>
+          {% elif feat == "3" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-warning rounded p-2 text-dark"><i class="fas fa-calculator"></i></div>
+              <span class="small">Budget Estimator</span>
+            </div>
+          </div>
+          {% elif feat == "4" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-info rounded p-2"><i class="fas fa-cloud-sun"></i></div>
+              <span class="small">Weather Insights</span>
+            </div>
+          </div>
+          {% elif feat == "5" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-danger rounded p-2"><i class="fas fa-comments"></i></div>
+              <span class="small">AI Chat Assistant</span>
+            </div>
+          </div>
+          {% elif feat == "6" %}
+          <div class="col-6">
+            <div class="d-flex align-items-center gap-2 text-white-75">
+              <div class="bg-secondary rounded p-2"><i class="fas fa-map"></i></div>
+              <span class="small">Maps Integration</span>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        <a href="{% url 'ai_dashboard' %}" class="btn btn-warning btn-lg mt-4 rounded-pill fw-bold">
+          <i class="fas fa-rocket me-2"></i>Try AI Features
+        </a>
+      </div>
+      <div class="col-lg-6">
+        <div class="bg-white bg-opacity-10 rounded-xl p-4 border border-white border-opacity-10">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:44px;height:44px">
+              <i class="fas fa-robot text-white"></i>
+            </div>
+            <div>
+              <div class="text-white fw-semibold">AI Travel Assistant</div>
+              <div class="text-success small"><i class="fas fa-circle me-1" style="font-size:.6rem"></i>Online</div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="chat-bubble-ai mb-3">👋 Hi! I'm your AI travel assistant. Tell me your dream destination and budget, and I'll plan the perfect trip!</div>
+            <div class="d-flex justify-content-end mb-2">
+              <div class="chat-bubble-user" style="background:rgba(255,255,255,.15);border-radius:18px 18px 4px 18px;padding:10px 14px;color:#fff">I want to visit a beach destination under ₹30,000</div>
+            </div>
+            <div class="chat-bubble-ai">🏖️ Great choice! I recommend Goa, Pondicherry, or Andaman Islands. Would you like a detailed day-wise itinerary for any of these?</div>
+          </div>
+          <a href="{% url 'ai_chat' %}" class="btn btn-primary w-100 rounded-pill">
+            <i class="fas fa-comments me-2"></i>Start Chatting with AI
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Tour Packages -->
+{% if featured_packages %}
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <p class="text-primary fw-semibold text-uppercase mb-1" style="font-size:.85rem;letter-spacing:1px">Best Value</p>
+        <h2 class="mb-0">Popular Tour Packages</h2>
+        <div class="section-divider mx-0 mt-2"></div>
+      </div>
+      <a href="{% url 'package_list' %}" class="btn btn-outline-primary rounded-pill">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for pkg in featured_packages %}
+      <div class="col-lg-3 col-md-6">
+        <div class="card h-100">
+          <div class="img-hover-zoom position-relative">
+            {% if pkg.image %}
+            <img src="{{ pkg.image.url }}" class="card-img-top" alt="{{ pkg.name }}" style="height:200px;object-fit:cover">
+            {% else %}
+            <div class="card-img-top bg-gradient-primary d-flex align-items-center justify-content-center" style="height:200px">
+              <i class="fas fa-suitcase fa-3x text-white opacity-50"></i>
+            </div>
+            {% endif %}
+            {% if pkg.discount_percent > 0 %}
+            <span class="discount-badge position-absolute top-0 end-0 m-2">{{ pkg.discount_percent }}% OFF</span>
+            {% endif %}
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h6 class="fw-bold mb-1">{{ pkg.name }}</h6>
+            <small class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ pkg.destination.name }}</small>
+            <div class="d-flex gap-3 mb-3 small text-muted">
+              <span><i class="fas fa-calendar me-1"></i>{{ pkg.duration_days }} Days</span>
+              <span><i class="fas fa-users me-1"></i>Max {{ pkg.max_group_size }}</span>
+            </div>
+            <div class="mt-auto">
+              {% if pkg.discount_percent > 0 %}
+              <small class="text-muted text-decoration-line-through">₹{{ pkg.price_per_person|floatformat:0 }}</small><br>
+              {% endif %}
+              <span class="price-tag">₹{{ pkg.get_discounted_price|floatformat:0 }}</span>
+              <span class="text-muted small">/person</span>
+              <a href="{% url 'package_detail' pkg.slug %}" class="btn btn-outline-primary btn-sm w-100 mt-2 rounded-pill">View Package</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured Hotels -->
+{% if featured_hotels %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <p class="text-primary fw-semibold text-uppercase mb-1" style="font-size:.85rem;letter-spacing:1px">Best Stays</p>
+        <h2 class="mb-0">Top Rated Hotels</h2>
+        <div class="section-divider mx-0 mt-2"></div>
+      </div>
+      <a href="{% url 'hotel_list' %}" class="btn btn-outline-primary rounded-pill">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      {% for hotel in featured_hotels %}
+      <div class="col-lg-3 col-md-6">
+        <div class="card h-100">
+          {% if hotel.image %}
+          <img src="{{ hotel.image.url }}" class="card-img-top" alt="{{ hotel.name }}" style="height:190px;object-fit:cover">
+          {% else %}
+          <div class="card-img-top bg-info d-flex align-items-center justify-content-center" style="height:190px">
+            <i class="fas fa-hotel fa-3x text-white opacity-50"></i>
+          </div>
+          {% endif %}
+          <div class="card-body">
+            <h6 class="fw-bold mb-1">{{ hotel.name }}</h6>
+            <small class="text-muted"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ hotel.destination.name }}</small>
+            <div class="mt-2">
+              {% for i in "12345" %}
+              <i class="fas fa-star {% if forloop.counter <= hotel.stars %}text-warning{% else %}text-muted{% endif %}" style="font-size:.7rem"></i>
+              {% endfor %}
+            </div>
+            <div class="mt-2">
+              <span class="price-tag small">₹{{ hotel.price_per_night|floatformat:0 }}</span>
+              <span class="text-muted small">/night</span>
+            </div>
+            <a href="{% url 'book_hotel' hotel.id %}" class="btn btn-primary btn-sm w-100 mt-2 rounded-pill">Book Now</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Why Choose Us -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="section-header">
+      <p class="text-primary fw-semibold text-uppercase mb-1" style="font-size:.85rem;letter-spacing:1px">Our Advantages</p>
+      <h2>Why Choose AI Travel Planner?</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4 text-center">
+      {% for item in "1234" %}
+      <div class="col-lg-3 col-md-6">
+        <div class="card border-0 bg-light h-100 p-4">
+          {% if item == "1" %}
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center bg-primary" style="width:70px;height:70px"><i class="fas fa-robot fa-2x text-white"></i></div>
+          <h5 class="fw-bold">AI-Powered Planning</h5>
+          <p class="text-muted small">Smart recommendations tailored to your preferences and budget.</p>
+          {% elif item == "2" %}
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center bg-success" style="width:70px;height:70px"><i class="fas fa-shield-alt fa-2x text-white"></i></div>
+          <h5 class="fw-bold">Secure Booking</h5>
+          <p class="text-muted small">100% secure payments with instant confirmation and support.</p>
+          {% elif item == "3" %}
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center bg-warning" style="width:70px;height:70px"><i class="fas fa-headset fa-2x text-white"></i></div>
+          <h5 class="fw-bold">24/7 Support</h5>
+          <p class="text-muted small">Our AI chat and support team is always here to help you.</p>
+          {% else %}
+          <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center bg-danger" style="width:70px;height:70px"><i class="fas fa-tags fa-2x text-white"></i></div>
+          <h5 class="fw-bold">Best Prices</h5>
+          <p class="text-muted small">Exclusive deals and discounts on hotels, packages, and transport.</p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<section class="py-5" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+  <div class="container text-center text-white py-3">
+    <h2 class="fw-bold mb-3">Ready to Plan Your Dream Trip?</h2>
+    <p class="fs-5 mb-4 text-white-75">Join thousands of travelers who plan smarter with our AI assistant.</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{% url 'register' %}" class="btn btn-warning btn-lg rounded-pill fw-bold px-5">
+        <i class="fas fa-user-plus me-2"></i>Get Started Free
+      </a>
+      <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg rounded-pill px-5">
+        <i class="fas fa-sign-in-alt me-2"></i>Login
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

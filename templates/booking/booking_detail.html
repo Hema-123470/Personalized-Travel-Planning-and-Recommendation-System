@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Booking #{{ booking.booking_reference }} – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card overflow-hidden">
+        <!-- Booking Header -->
+        <div class="p-4 text-white" style="background:linear-gradient(135deg,#28a745,#20c997)">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="fas fa-check-circle fa-2x"></i>
+                <h4 class="fw-bold mb-0">Booking Confirmed!</h4>
+              </div>
+              <p class="mb-0 text-white-75">Reference: <strong>{{ booking.booking_reference }}</strong></p>
+            </div>
+            <div class="text-end">
+              <div class="badge bg-white text-success px-3 py-2 fs-6">{{ booking.status|title }}</div>
+              <div class="text-white-75 small mt-1">{{ booking.created_at|date:"d M Y, H:i" }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4">
+          <!-- Booking Info -->
+          <div class="row g-4 mb-4">
+            <div class="col-md-6">
+              <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing:.5px;font-size:.75rem">Booking Details</h6>
+              <table class="table table-borderless table-sm mb-0">
+                <tr><td class="text-muted">Type:</td><td class="fw-semibold">{{ booking.get_booking_type_display }}</td></tr>
+                <tr><td class="text-muted">Guests:</td><td class="fw-semibold">{{ booking.number_of_guests }}</td></tr>
+                {% if booking.check_in_date %}<tr><td class="text-muted">Check-in:</td><td class="fw-semibold">{{ booking.check_in_date }}</td></tr>{% endif %}
+                {% if booking.check_out_date %}<tr><td class="text-muted">Check-out:</td><td class="fw-semibold">{{ booking.check_out_date }}</td></tr>{% endif %}
+                {% if booking.travel_date %}<tr><td class="text-muted">Travel Date:</td><td class="fw-semibold">{{ booking.travel_date }}</td></tr>{% endif %}
+                {% if booking.number_of_nights > 1 %}<tr><td class="text-muted">Nights:</td><td class="fw-semibold">{{ booking.number_of_nights }}</td></tr>{% endif %}
+              </table>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-bold text-muted text-uppercase mb-3" style="letter-spacing:.5px;font-size:.75rem">Payment Details</h6>
+              <table class="table table-borderless table-sm mb-0">
+                <tr><td class="text-muted">Base Amount:</td><td class="fw-semibold">₹{{ booking.base_amount|floatformat:0 }}</td></tr>
+                {% if booking.discount_amount > 0 %}<tr><td class="text-success">Discount:</td><td class="text-success fw-semibold">-₹{{ booking.discount_amount|floatformat:0 }}</td></tr>{% endif %}
+                <tr><td class="text-muted">Tax (GST):</td><td class="fw-semibold">₹{{ booking.tax_amount|floatformat:0 }}</td></tr>
+                <tr class="border-top"><td class="fw-bold">Total:</td><td class="fw-bold text-primary fs-5">₹{{ booking.total_amount|floatformat:0 }}</td></tr>
+                <tr><td class="text-muted">Payment:</td><td><span class="badge bg-{% if booking.payment_status == 'paid' %}success{% else %}warning text-dark{% endif %}">{{ booking.payment_status|title }}</span></td></tr>
+                {% if booking.payment_method %}<tr><td class="text-muted">Method:</td><td class="fw-semibold">{{ booking.payment_method|title }}</td></tr>{% endif %}
+              </table>
+            </div>
+          </div>
+
+          {% if booking.hotel %}<div class="alert alert-light border"><strong>Hotel:</strong> {{ booking.hotel.name }} – {{ booking.hotel.destination.name }} ({{ booking.hotel.stars }}★)</div>{% endif %}
+          {% if booking.tour_package %}<div class="alert alert-light border"><strong>Package:</strong> {{ booking.tour_package.name }} – {{ booking.tour_package.destination.name }}</div>{% endif %}
+          {% if booking.transport %}<div class="alert alert-light border"><strong>Transport:</strong> {{ booking.transport.name }} – {{ booking.transport.from_location }} → {{ booking.transport.to_location }}</div>{% endif %}
+          {% if booking.special_requests %}<div class="mb-3"><strong>Special Requests:</strong><p class="text-muted small mb-0">{{ booking.special_requests }}</p></div>{% endif %}
+
+          <div class="d-flex gap-2 flex-wrap mt-4">
+            <a href="{% url 'booking_history' %}" class="btn btn-outline-secondary rounded-pill px-4">← All Bookings</a>
+            {% if booking.status in 'pending confirmed' %}
+            <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-outline-danger rounded-pill px-4" onclick="return confirm('Are you sure you want to cancel this booking?')">
+              <i class="fas fa-times me-1"></i>Cancel Booking
+            </a>
+            {% endif %}
+            <a href="{% url 'traveler_dashboard' %}" class="btn btn-primary rounded-pill px-4">Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'admin_base.html' %}
+{% block title %}Manage Transports – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-bus me-2 text-primary"></i>Manage Transports</h5>
+        <a href="{% url 'admin_transport_create' %}" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i>Add Transport</a>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Name</th><th>Type</th><th>Route</th><th>Duration</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for t in transports %}
+              <tr>
+                <td class="fw-semibold align-middle">{{ t.name }}</td>
+                <td class="align-middle"><span class="badge bg-{% if t.transport_type == 'flight' %}info text-dark{% elif t.transport_type == 'train' %}success{% elif t.transport_type == 'bus' %}warning text-dark{% else %}secondary{% endif %} rounded-pill"><i class="fas fa-{% if t.transport_type == 'flight' %}plane{% elif t.transport_type == 'train' %}train{% elif t.transport_type == 'bus' %}bus{% elif t.transport_type == 'ferry' %}ship{% else %}car{% endif %} me-1"></i>{{ t.get_transport_type_display }}</span></td>
+                <td class="small align-middle"><strong>{{ t.from_location }}</strong> <i class="fas fa-arrow-right text-muted mx-1" style="font-size:.7rem"></i> <strong>{{ t.to_location }}</strong></td>
+                <td class="text-muted small align-middle">{{ t.duration|default:"—" }}</td>
+                <td class="fw-bold text-primary small align-middle">₹{{ t.price|floatformat:0 }}</td>
+                <td class="align-middle"><span class="badge bg-{% if t.is_active %}success{% else %}secondary{% endif %} rounded-pill">{% if t.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                <td class="align-middle">
+                  <div class="d-flex gap-1">
+                    <a href="{% url 'admin_transport_edit' t.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'admin_transport_delete' t.pk %}" class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="text-center text-muted py-4">No transports found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if transports.has_other_pages %}
+        <div class="p-3 d-flex justify-content-center"><ul class="pagination mb-0">{% if transports.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ transports.previous_page_number }}">‹</a></li>{% endif %}{% for n in transports.paginator.page_range %}<li class="page-item {% if transports.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>{% endfor %}{% if transports.has_next %}<li class="page-item"><a class="page-link" href="?page={{ transports.next_page_number }}">›</a></li>{% endif %}</ul></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

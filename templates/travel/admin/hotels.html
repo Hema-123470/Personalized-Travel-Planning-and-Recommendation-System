@@ -1,0 +1,52 @@
+{% extends 'admin_base.html' %}
+{% block title %}Manage Hotels – Admin{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-lg-2 col-md-3">{% include 'partials/admin_sidebar.html' %}</div>
+    <div class="col-lg-10 col-md-9">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold mb-0"><i class="fas fa-hotel me-2 text-primary"></i>Manage Hotels</h5>
+        <a href="{% url 'admin_hotel_create' %}" class="btn btn-primary rounded-pill"><i class="fas fa-plus me-1"></i>Add Hotel</a>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead><tr><th>Image</th><th>Name</th><th>Destination</th><th>Stars</th><th>Price/Night</th><th>Featured</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for hotel in hotels %}
+              <tr>
+                <td>{% if hotel.image %}<img src="{{ hotel.image.url }}" class="rounded" width="55" height="45" style="object-fit:cover">{% else %}<div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:55px;height:45px"><i class="fas fa-hotel text-muted"></i></div>{% endif %}</td>
+                <td class="fw-semibold align-middle">{{ hotel.name }}</td>
+                <td class="text-muted small align-middle">{{ hotel.destination.name }}</td>
+                <td class="align-middle text-warning">{% for i in "12345" %}{% if forloop.counter <= hotel.stars %}<i class="fas fa-star" style="font-size:.7rem"></i>{% else %}<i class="far fa-star text-muted" style="font-size:.7rem"></i>{% endif %}{% endfor %}</td>
+                <td class="fw-bold text-primary small align-middle">₹{{ hotel.price_per_night|floatformat:0 }}</td>
+                <td class="align-middle">{% if hotel.is_featured %}<span class="badge bg-warning text-dark rounded-pill">Featured</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                <td class="align-middle"><span class="badge bg-{% if hotel.is_active %}success{% else %}secondary{% endif %} rounded-pill">{% if hotel.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                <td class="align-middle">
+                  <div class="d-flex gap-1">
+                    <a href="{% url 'admin_hotel_edit' hotel.pk %}" class="btn btn-sm btn-outline-primary rounded-pill"><i class="fas fa-edit"></i></a>
+                    <a href="{% url 'admin_hotel_delete' hotel.pk %}" class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-trash"></i></a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="8" class="text-center text-muted py-4">No hotels found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if hotels.has_other_pages %}
+        <div class="p-3 d-flex justify-content-center">
+          <ul class="pagination mb-0">
+            {% if hotels.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ hotels.previous_page_number }}">‹</a></li>{% endif %}
+            {% for n in hotels.paginator.page_range %}<li class="page-item {% if hotels.number == n %}active{% endif %}"><a class="page-link" href="?page={{ n }}">{{ n }}</a></li>{% endfor %}
+            {% if hotels.has_next %}<li class="page-item"><a class="page-link" href="?page={{ hotels.next_page_number }}">›</a></li>{% endif %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

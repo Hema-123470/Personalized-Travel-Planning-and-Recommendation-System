@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}AI Features – AI Travel Planner{% endblock %}
+{% block content %}
+<section class="py-4 text-white" style="background:linear-gradient(135deg,#0a0e1a,#1a1f35)">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:55px;height:55px"><i class="fas fa-robot fa-lg text-white"></i></div>
+      <div>
+        <h2 class="fw-bold mb-0 text-white">AI Travel Features</h2>
+        <p class="text-white-50 mb-0">Powered by artificial intelligence for smarter travel planning</p>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="container py-5">
+  <!-- AI Feature Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#667eea,#764ba2)">
+          <i class="fas fa-lightbulb fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">Smart Recommendations</h5>
+        <p class="text-muted small">Get personalized destination recommendations based on your budget, preferences, and travel style.</p>
+        <a href="{% url 'ai_recommendations' %}" class="btn btn-primary rounded-pill mt-auto">Get Recommendations</a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#4facfe,#00f2fe)">
+          <i class="fas fa-route fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">Itinerary Generator</h5>
+        <p class="text-muted small">Auto-generate detailed day-wise travel itineraries with timings, activities, and cost estimates.</p>
+        <a href="{% url 'ai_itinerary' %}" class="btn btn-info rounded-pill mt-auto text-white">Generate Itinerary</a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#f093fb,#f5576c)">
+          <i class="fas fa-calculator fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">Cost Estimator</h5>
+        <p class="text-muted small">Get accurate travel cost breakdowns including accommodation, food, transport, and activities.</p>
+        <a href="{% url 'ai_cost_estimator' %}" class="btn btn-danger rounded-pill mt-auto">Estimate Cost</a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#43e97b,#38f9d7)">
+          <i class="fas fa-cloud-sun fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">Weather Info</h5>
+        <p class="text-muted small">Real-time weather conditions and forecasts for any destination worldwide.</p>
+        <a href="{% url 'ai_weather' %}" class="btn btn-success rounded-pill mt-auto">Check Weather</a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#fda085,#f6d365)">
+          <i class="fas fa-map-marked-alt fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">Nearby Attractions</h5>
+        <p class="text-muted small">Discover attractions, restaurants, and activities near your location using GPS.</p>
+        <a href="{% url 'ai_nearby' %}" class="btn btn-warning rounded-pill mt-auto">Find Nearby</a>
+      </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100 border-0 shadow-sm text-center p-4">
+        <div class="mx-auto mb-3 rounded-circle d-flex align-items-center justify-content-center" style="width:70px;height:70px;background:linear-gradient(135deg,#0d6efd,#0099ff)">
+          <i class="fas fa-comments fa-2x text-white"></i>
+        </div>
+        <h5 class="fw-bold">AI Chat Assistant</h5>
+        <p class="text-muted small">Chat with our intelligent travel assistant for instant advice, recommendations, and planning help.</p>
+        <a href="{% url 'ai_chat' %}" class="btn btn-primary rounded-pill mt-auto">Start Chat</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personalized Recommendations -->
+  {% if personalized %}
+  <div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold"><i class="fas fa-star me-2 text-warning"></i>Personalized For You</h5>
+      <a href="{% url 'ai_recommendations' %}" class="btn btn-sm btn-outline-primary rounded-pill">Get More</a>
+    </div>
+    <div class="row g-3">
+      {% for dest in personalized %}
+      <div class="col-lg-2 col-md-4 col-6">
+        <a href="{% url 'destination_detail' dest.slug %}" class="text-decoration-none">
+          <div class="card h-100 text-center border-0 shadow-sm overflow-hidden">
+            {% if dest.image %}
+            <img src="{{ dest.image.url }}" style="height:100px;object-fit:cover" alt="{{ dest.name }}">
+            {% else %}
+            <div class="bg-primary d-flex align-items-center justify-content-center" style="height:100px"><i class="fas fa-mountain fa-2x text-white opacity-50"></i></div>
+            {% endif %}
+            <div class="p-2">
+              <div class="fw-semibold small text-dark">{{ dest.name }}</div>
+              <div class="text-muted" style="font-size:.7rem">{{ dest.country }}</div>
+              <div class="text-warning" style="font-size:.7rem">★ {{ dest.rating }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- History -->
+  {% if recent_history %}
+  <div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold"><i class="fas fa-history me-2 text-secondary"></i>Recent AI Queries</h5>
+      <a href="{% url 'ai_history' %}" class="btn btn-sm btn-outline-secondary rounded-pill">View All</a>
+    </div>
+    <div class="row g-3">
+      {% for h in recent_history %}
+      <div class="col-md-4">
+        <div class="card p-3 border-0 bg-light">
+          <div class="small fw-semibold text-truncate">{{ h.query }}</div>
+          {% if h.budget %}<span class="badge bg-success mt-1">Budget: ₹{{ h.budget|floatformat:0 }}</span>{% endif %}
+          {% if h.duration_days %}<span class="badge bg-info mt-1">{{ h.duration_days }} Days</span>{% endif %}
+          <div class="text-muted mt-1" style="font-size:.7rem">{{ h.created_at|date:"d M Y" }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

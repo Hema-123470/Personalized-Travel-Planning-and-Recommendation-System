@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Travel Cost Estimator – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card p-4">
+        <div class="text-center mb-3">
+          <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-2" style="width:70px;height:70px;background:linear-gradient(135deg,#f093fb,#f5576c)">
+            <i class="fas fa-calculator fa-2x text-white"></i>
+          </div>
+          <h4 class="fw-bold">Travel Cost Estimator</h4>
+          <p class="text-muted small">Get a detailed cost breakdown for your trip.</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Destination *</label>
+            <select name="destination" class="form-select" required>
+              <option value="">Choose destination...</option>
+              {% for d in destinations %}<option value="{{ d.id }}" {% if result and result.destination.id == d.id %}selected{% endif %}>{{ d.name }}, {{ d.country }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Duration (Days)</label>
+              <input type="number" name="duration" class="form-control" value="{{ result.duration|default:'5' }}" min="1" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Travelers</label>
+              <input type="number" name="travelers" class="form-control" value="{{ result.travelers|default:'2' }}" min="1" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Hotel Stars Preference</label>
+            <select name="hotel_stars" class="form-select">
+              <option value="2">Budget (2★)</option>
+              <option value="3" selected>Standard (3★)</option>
+              <option value="4">Premium (4★)</option>
+              <option value="5">Luxury (5★)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-danger w-100 rounded-pill fw-semibold py-2">
+            <i class="fas fa-calculator me-2"></i>Calculate Cost
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      {% if result %}
+      <div class="card p-4">
+        <h5 class="fw-bold mb-1">Cost Breakdown for {{ result.destination.name }}</h5>
+        <p class="text-muted small mb-4">{{ result.duration }} Days · {{ result.travelers }} Traveler{{ result.travelers|pluralize }}</p>
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div class="bg-primary bg-opacity-10 rounded-xl p-3 text-center">
+              <i class="fas fa-hotel text-primary fa-2x mb-2"></i>
+              <div class="fw-bold text-primary">₹{{ result.accommodation|floatformat:0 }}</div>
+              <small class="text-muted">Accommodation</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-warning bg-opacity-10 rounded-xl p-3 text-center">
+              <i class="fas fa-utensils text-warning fa-2x mb-2"></i>
+              <div class="fw-bold text-warning">₹{{ result.food|floatformat:0 }}</div>
+              <small class="text-muted">Food & Dining</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-success bg-opacity-10 rounded-xl p-3 text-center">
+              <i class="fas fa-camera text-success fa-2x mb-2"></i>
+              <div class="fw-bold text-success">₹{{ result.attractions|floatformat:0 }}</div>
+              <small class="text-muted">Attractions</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-info bg-opacity-10 rounded-xl p-3 text-center">
+              <i class="fas fa-shopping-bag text-info fa-2x mb-2"></i>
+              <div class="fw-bold text-info">₹{{ result.miscellaneous|floatformat:0 }}</div>
+              <small class="text-muted">Miscellaneous</small>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl text-center" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+          <div class="text-white-75 small">Total Trip Cost</div>
+          <div class="text-white fw-bold" style="font-size:2.5rem">₹{{ result.total|floatformat:0 }}</div>
+          <div class="text-white-75">₹{{ result.per_person|floatformat:0 }} per person</div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <a href="{% url 'destination_detail' result.destination.slug %}" class="btn btn-outline-primary rounded-pill flex-grow-1">View Destination</a>
+          <a href="{% url 'ai_itinerary' %}" class="btn btn-primary rounded-pill flex-grow-1"><i class="fas fa-route me-1"></i>Generate Itinerary</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="card p-5 text-center border-dashed h-100 d-flex flex-column align-items-center justify-content-center" style="border:2px dashed #dee2e6">
+        <i class="fas fa-calculator fa-4x text-muted mb-3"></i>
+        <h5 class="text-muted">Enter trip details to see cost estimate</h5>
+        <p class="text-muted small">Fill in the form on the left to get a detailed breakdown of your travel costs.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

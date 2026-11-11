@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Plan a Trip – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center bg-success mb-3" style="width:70px;height:70px"><i class="fas fa-route fa-2x text-white"></i></div>
+          <h3 class="fw-bold">Plan Your Trip</h3>
+          <p class="text-muted">Create a personalized trip plan for your next adventure</p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Trip Title *</label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors|join:"" }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Destination *</label>
+              {{ form.destination }}
+              {% if form.destination.errors %}<div class="text-danger small">{{ form.destination.errors|join:"" }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Start Date *</label>
+              {{ form.start_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">End Date *</label>
+              {{ form.end_date }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Number of Travelers</label>
+              {{ form.number_of_travelers }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Budget (₹)</label>
+              {{ form.budget }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Notes</label>
+              {{ form.notes }}
+            </div>
+            {% if form.non_field_errors %}<div class="col-12 alert alert-danger small py-2">{{ form.non_field_errors|join:"" }}</div>{% endif %}
+            <div class="col-12 d-flex gap-2 justify-content-end mt-2">
+              <a href="{% url 'my_trips' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+              <button type="submit" class="btn btn-success rounded-pill px-5 fw-semibold">
+                <i class="fas fa-save me-2"></i>Create Trip Plan
+              </button>
+            </div>
+          </div>
+        </form>
+        <hr class="my-4">
+        <div class="text-center">
+          <p class="text-muted small mb-2">Want AI to plan it for you?</p>
+          <a href="{% url 'ai_itinerary' %}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-magic me-2"></i>Generate AI Itinerary</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}{{ package.name }} – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card overflow-hidden mb-4">
+        {% if package.image %}<img src="{{ package.image.url }}" class="w-100" style="height:350px;object-fit:cover" alt="{{ package.name }}">{% endif %}
+        <div class="card-body p-4">
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            {% if package.is_featured %}<span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i>Featured</span>{% endif %}
+            <span class="badge bg-{% if package.difficulty == 'easy' %}success{% elif package.difficulty == 'moderate' %}warning text-dark{% else %}danger{% endif %}">{{ package.difficulty|title }}</span>
+            {% if package.category %}<span class="badge bg-primary">{{ package.category.name }}</span>{% endif %}
+          </div>
+          <h2 class="fw-bold">{{ package.name }}</h2>
+          <p class="text-muted"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ package.destination.name }}, {{ package.destination.country }}</p>
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3 text-center border-end">
+              <i class="fas fa-calendar text-primary fa-lg mb-1"></i>
+              <div class="fw-bold">{{ package.duration_days }} Days</div>
+              <small class="text-muted">Duration</small>
+            </div>
+            <div class="col-6 col-md-3 text-center border-end">
+              <i class="fas fa-users text-success fa-lg mb-1"></i>
+              <div class="fw-bold">{{ package.max_group_size }}</div>
+              <small class="text-muted">Max Group</small>
+            </div>
+            <div class="col-6 col-md-3 text-center border-end">
+              <i class="fas fa-star text-warning fa-lg mb-1"></i>
+              <div class="fw-bold">{{ package.rating }}/5</div>
+              <small class="text-muted">Rating</small>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+              <i class="fas fa-calendar-check text-info fa-lg mb-1"></i>
+              <div class="fw-bold">{{ package.total_bookings }}</div>
+              <small class="text-muted">Bookings</small>
+            </div>
+          </div>
+          <h5 class="fw-bold mb-2">About This Package</h5>
+          <p class="text-muted" style="line-height:1.8">{{ package.description }}</p>
+          {% if package.itinerary %}
+          <h5 class="fw-bold mt-4 mb-3"><i class="fas fa-route me-2 text-primary"></i>Itinerary</h5>
+          <div class="bg-light rounded-xl p-3"><pre class="mb-0 small" style="white-space:pre-wrap;font-family:inherit">{{ package.itinerary }}</pre></div>
+          {% endif %}
+          {% if package.includes %}
+          <div class="row g-3 mt-3">
+            <div class="col-md-6">
+              <h6 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i>What's Included</h6>
+              <div class="bg-success bg-opacity-10 rounded p-3 small">{{ package.includes }}</div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="fw-bold text-danger"><i class="fas fa-times-circle me-2"></i>What's Excluded</h6>
+              <div class="bg-danger bg-opacity-10 rounded p-3 small">{{ package.excludes }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-4 mb-3 sticky-top" style="top:80px">
+        <h5 class="fw-bold text-center mb-3">Book This Package</h5>
+        <div class="text-center mb-3">
+          {% if package.discount_percent > 0 %}
+          <div class="text-muted text-decoration-line-through">₹{{ package.price_per_person|floatformat:0 }}</div>
+          <div class="discount-badge mb-1">{{ package.discount_percent }}% OFF</div>
+          {% endif %}
+          <div class="price-tag">₹{{ package.get_discounted_price|floatformat:0 }}</div>
+          <small class="text-muted">per person</small>
+        </div>
+        {% if user.is_authenticated %}
+        <a href="{% url 'book_package' package.id %}" class="btn btn-primary w-100 fw-semibold rounded-pill mb-2"><i class="fas fa-calendar-check me-2"></i>Book Now</a>
+        {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary w-100 rounded-pill mb-2">Login to Book</a>
+        {% endif %}
+        <a href="{% url 'ai_itinerary' %}" class="btn btn-outline-success w-100 rounded-pill"><i class="fas fa-magic me-2"></i>Generate AI Itinerary</a>
+        <hr>
+        <div class="small text-muted">
+          <div class="d-flex justify-content-between mb-1"><span>Duration:</span><strong>{{ package.duration_days }} Days</strong></div>
+          <div class="d-flex justify-content-between mb-1"><span>Group Size:</span><strong>Max {{ package.max_group_size }}</strong></div>
+          <div class="d-flex justify-content-between mb-1"><span>Difficulty:</span><strong>{{ package.difficulty|title }}</strong></div>
+          <div class="d-flex justify-content-between"><span>Destination:</span><strong>{{ package.destination.name }}</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

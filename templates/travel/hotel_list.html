@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Hotels – AI Travel Planner{% endblock %}
+{% block content %}
+<section class="py-4" style="background:linear-gradient(135deg,#f093fb,#f5576c)">
+  <div class="container text-white">
+    <h2 class="fw-bold mb-1">Find Your Perfect Stay</h2>
+    <p class="text-white-75 mb-3">Handpicked hotels across all destinations</p>
+    <form method="get" class="row g-2">
+      <div class="col-md-4"><input type="text" name="search" value="{{ search }}" class="form-control border-0" placeholder="Search hotels or destinations..."></div>
+      <div class="col-md-3">
+        <select name="destination" class="form-select border-0">
+          <option value="">All Destinations</option>
+          {% for d in destinations %}<option value="{{ d.id }}" {% if request.GET.destination == d.id|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="stars" class="form-select border-0">
+          <option value="">Star Rating</option>
+          {% for i in "12345" %}<option value="{{ i }}" {% if request.GET.stars == i %}selected{% endif %}>{{ i }} Star</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2"><input type="number" name="max_price" value="{{ request.GET.max_price }}" class="form-control border-0" placeholder="Max price/night"></div>
+      <div class="col-md-1"><button type="submit" class="btn btn-dark w-100 rounded-pill">Go</button></div>
+    </form>
+  </div>
+</section>
+<div class="container py-4">
+  <div class="row g-4">
+    {% for hotel in hotels %}
+    <div class="col-xl-4 col-md-6">
+      <div class="card h-100">
+        {% if hotel.image %}<img src="{{ hotel.image.url }}" class="card-img-top" style="height:210px;object-fit:cover" alt="{{ hotel.name }}">
+        {% else %}<div class="card-img-top bg-info d-flex align-items-center justify-content-center" style="height:210px"><i class="fas fa-hotel fa-4x text-white opacity-50"></i></div>{% endif %}
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title fw-bold mb-0">{{ hotel.name }}</h5>
+            <div>{% for i in "12345" %}<i class="fas fa-star {% if forloop.counter <= hotel.stars %}text-warning{% else %}text-muted{% endif %}" style="font-size:.65rem"></i>{% endfor %}</div>
+          </div>
+          <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt me-1 text-primary"></i>{{ hotel.destination.name }}</p>
+          <p class="card-text text-muted small flex-grow-1">{{ hotel.description|truncatechars:100 }}</p>
+          {% if hotel.amenities %}
+          <div class="mb-3 d-flex flex-wrap gap-1">
+            {% for a in hotel.get_amenities_list|slice:":4" %}
+            <span class="badge bg-light text-muted border" style="font-size:.7rem">{{ a }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <div><span class="price-tag">₹{{ hotel.price_per_night|floatformat:0 }}</span><span class="text-muted small">/night</span></div>
+            <a href="{% url 'book_hotel' hotel.id %}" class="btn btn-primary btn-sm rounded-pill px-3"><i class="fas fa-calendar-check me-1"></i>Book Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5"><i class="fas fa-hotel fa-4x text-muted mb-3"></i><h5 class="text-muted">No hotels found.</h5></div>
+    {% endfor %}
+  </div>
+  {% if hotels.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if hotels.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ hotels.previous_page_number }}"><i class="fas fa-chevron-left"></i></a></li>{% endif %}
+      {% for num in hotels.paginator.page_range %}<li class="page-item {% if hotels.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+      {% if hotels.has_next %}<li class="page-item"><a class="page-link" href="?page={{ hotels.next_page_number }}"><i class="fas fa-chevron-right"></i></a></li>{% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

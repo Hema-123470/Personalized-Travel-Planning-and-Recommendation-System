@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}My Trips – AI Travel Planner{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold"><i class="fas fa-route text-success me-2"></i>My Trip Plans</h4>
+    <a href="{% url 'plan_trip' %}" class="btn btn-success rounded-pill"><i class="fas fa-plus me-1"></i>New Trip</a>
+  </div>
+  <div class="row g-4">
+    {% for trip in trips %}
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">{{ trip.title }}</span>
+          <span class="badge bg-{% if trip.status == 'planning' %}warning text-dark{% elif trip.status == 'confirmed' %}success{% elif trip.status == 'completed' %}info{% else %}secondary{% endif %} rounded-pill">{{ trip.status|title }}</span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            {% if trip.destination.image %}
+            <img src="{{ trip.destination.image.url }}" class="rounded" width="60" height="60" style="object-fit:cover">
+            {% else %}
+            <div class="rounded bg-primary d-flex align-items-center justify-content-center" style="width:60px;height:60px"><i class="fas fa-mountain text-white"></i></div>
+            {% endif %}
+            <div>
+              <div class="fw-bold">{{ trip.destination.name }}</div>
+              <small class="text-muted">{{ trip.destination.country }}</small>
+            </div>
+          </div>
+          <div class="row g-2 small text-muted">
+            <div class="col-6"><i class="fas fa-calendar me-1 text-primary"></i>{{ trip.start_date }} – {{ trip.end_date }}</div>
+            <div class="col-6"><i class="fas fa-sun me-1 text-warning"></i>{{ trip.duration_days }} Days</div>
+            <div class="col-6"><i class="fas fa-users me-1 text-success"></i>{{ trip.number_of_travelers }} Traveler{{ trip.number_of_travelers|pluralize }}</div>
+            {% if trip.budget > 0 %}<div class="col-6"><i class="fas fa-wallet me-1 text-danger"></i>₹{{ trip.budget|floatformat:0 }}</div>{% endif %}
+          </div>
+          {% if trip.notes %}<p class="text-muted small mt-2 mb-0">{{ trip.notes|truncatechars:100 }}</p>{% endif %}
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+          <a href="{% url 'trip_detail' trip.id %}" class="btn btn-sm btn-outline-primary rounded-pill flex-grow-1">View Details</a>
+          <a href="{% url 'ai_itinerary' %}" class="btn btn-sm btn-outline-success rounded-pill"><i class="fas fa-magic"></i></a>
+          <a href="{% url 'delete_trip' trip.id %}" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Delete this trip?')"><i class="fas fa-trash"></i></a>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+      <i class="fas fa-map fa-5x text-muted mb-3"></i>
+      <h5 class="text-muted">No trip plans yet.</h5>
+      <p class="text-muted">Start planning your dream vacation today!</p>
+      <div class="d-flex gap-3 justify-content-center mt-3">
+        <a href="{% url 'plan_trip' %}" class="btn btn-success rounded-pill px-4">Plan a Trip</a>
+        <a href="{% url 'ai_itinerary' %}" class="btn btn-primary rounded-pill px-4">AI Itinerary Generator</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
